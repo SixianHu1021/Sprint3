@@ -6,7 +6,10 @@ import org.example.model.UserRole;
 import org.example.service.AccountService;
 
 /**
- * 【Sprint 2 · US03 #4 / US16 #51 / US12 #13】主负责人：Henry。审核人：Yuhan（菜单集成）。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
+ *
+ * 【Sprint 2 · US03 #4 / US16 #51 / US12 #13】主负责人：Henry。
  * 做什么：账户相关的控制台页面：注册／首次管理员／管理员添加用户的资料表单（从 Sprint 1 ConsoleUi.createAccount 移来），
  * 以及新的“我的资料”页面（查看资料、修改姓名邮箱电话、修改密码）。
  * 对接／验证：所有输入通过 Yuhan 的 ConsoleIO（必填立即重问、密码隐藏）；业务规则全部在 AccountService，
@@ -18,6 +21,7 @@ public final class AccountScreens {
     private final ConsoleIO io;
 
     /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
      * 主负责人：Henry。
      * 做什么：保存账户服务和共用输入输出。
      * 对接／验证：ConsoleUi 构造时创建一次。
@@ -31,10 +35,11 @@ public final class AccountScreens {
     }
 
     /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
      * 主负责人：Henry（Sprint 1 写法，Sprint 2 改用 ConsoleIO）。
      * 做什么：收集 ID、用户名、密码、姓名、邮箱、电话；按模式调用 bootstrapAdmin、addUser 或 register。
      * 管理员模式先检查权限，再询问资料（未授权时不会出现 “Full name:” 提示）。
-     * 对接／验证：空白字段在输入时立即重问（US14）；重复邮箱／电话由 AccountService 拒绝并说明字段（US16）；
+     * 对接／验证：每一项输入后立即检查并只重问该项（US14）：重复 ID／用户名、密码不合规、邮箱／电话格式或重复（US16）；
      * 管理员可选择 MEMBER 或 ADMIN（US12）。AccountConsoleTest 覆盖三种模式。
      *
      * @param mode {@code bootstrap}, {@code admin} or {@code register}
@@ -43,12 +48,14 @@ public final class AccountScreens {
         if (mode.equals("admin")) {
             accounts.listUsers();
         }
-        String id = io.askRequired("ID key: ", "ID key");
-        String username = io.askRequired("Username: ", "Username");
-        String password = io.password("Password: ");
-        String name = io.askRequired("Full name: ", "Full name");
-        String email = io.askRequired("Email: ", "Email");
-        String phone = io.askRequired("Phone: ", "Phone");
+        // 【US14 逐项检查】每输入一项就检查，错误只重问这一项；输入 cancel 放弃表单。
+        io.info(ConsoleIO.CANCEL_HINT);
+        String id = io.askValid("ID key: ", accounts::checkNewIdKey);
+        String username = io.askValid("Username: ", accounts::checkNewUsername);
+        String password = io.passwordValid("Password: ", AccountService::checkPassword);
+        String name = io.askValid("Full name: ", v -> org.example.service.Validation.text(v, "Full name"));
+        String email = io.askValid("Email: ", v -> accounts.checkEmail(v, null));
+        String phone = io.askValid("Phone: ", v -> accounts.checkPhone(v, null));
         switch (mode) {
             case "bootstrap" -> accounts.bootstrapAdmin(id, username, password, name, email, phone);
             case "admin" -> accounts.addUser(id, username, password, name, email, phone, askRole());
@@ -58,6 +65,7 @@ public final class AccountScreens {
     }
 
     /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
      * 主负责人：Henry。
      * 做什么：管理员添加用户时选择角色：1 或 MEMBER、2 或 ADMIN；其他输入显示错误并重问。
      * 对接／验证：US12 “管理员可以创建管理员和普通用户”；US14 输入错误不退出表单。
@@ -76,6 +84,7 @@ public final class AccountScreens {
     }
 
     /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
      * 【Sprint 2 · US03 #4】主负责人：Henry。
      * 做什么：“我的资料”页面：每轮先显示当前资料，再显示编号菜单（修改资料 / 修改密码 / 返回）。
      * 对接／验证：访客无法进入（requireUser）；ID key 只显示、不可修改。ProfileConsoleTest 覆盖。
@@ -89,6 +98,7 @@ public final class AccountScreens {
     }
 
     /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
      * 【Sprint 2 · US03 #4】主负责人：Henry。
      * 做什么：显示 ID、用户名、姓名、邮箱、电话和角色；不显示密码或哈希。
      * 对接／验证：数据每次从 AccountService.currentUser 重新读取，修改后立即看到新值。
@@ -105,40 +115,45 @@ public final class AccountScreens {
     }
 
     /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
      * 【Sprint 2 · US03 #4 / US16 #51】主负责人：Henry。
-     * 做什么：逐项询问新值，直接回车保留原值，然后一次性保存。
+     * 做什么：逐项询问新值并立即检查，直接回车保留原值，然后一次性保存。
      * 对接／验证：邮箱／电话与他人重复时显示 “Error: Email address is already registered…” 并保持原资料。
      */
     private void editDetails() {
         User user = accounts.requireUser();
-        String name = keep(io.askOptional("Full name [" + user.getFullName() + "]: "), user.getFullName());
-        String email = keep(io.askOptional("Email [" + user.getEmail() + "]: "), user.getEmail());
-        String phone = keep(io.askOptional("Phone [" + user.getPhone() + "]: "), user.getPhone());
+        String me = user.getIdKey();
+        io.info("Press Enter to keep a value. " + ConsoleIO.CANCEL_HINT);
+        // 【US14 逐项检查】每一项输入后立即检查；空输入保留原值。
+        String name = io.askValid("Full name [" + user.getFullName() + "]: ",
+                v -> v.isBlank() ? user.getFullName() : org.example.service.Validation.text(v, "Full name"));
+        String email = io.askValid("Email [" + user.getEmail() + "]: ",
+                v -> v.isBlank() ? user.getEmail() : accounts.checkEmail(v, me));
+        String phone = io.askValid("Phone [" + user.getPhone() + "]: ",
+                v -> v.isBlank() ? user.getPhone() : accounts.checkPhone(v, me));
         accounts.updateProfile(name, email, phone);
         io.info("Profile updated.");
     }
 
     /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
      * 【Sprint 2 · US03 #4 / US15 #50】主负责人：Henry。
-     * 做什么：输入当前密码、新密码和确认密码（全部隐藏输入）；两次新密码不一致时不调用服务。
+     * 做什么：输入当前密码、新密码和确认密码（全部隐藏输入），每项输入后立即检查。
      * 对接／验证：当前密码错误、长度不符合时显示错误；成功后新密码以哈希保存。
      */
     private void changePassword() {
-        String current = io.password("Current password: ");
-        String next = io.password("New password: ");
-        String confirm = io.password("Confirm new password: ");
-        if (!next.equals(confirm)) {
-            throw new IllegalArgumentException("New passwords do not match");
-        }
+        // 【US14 逐项检查】当前密码错误、新密码不合规、两次不一致都立即提示并只重问该项。
+        io.info(ConsoleIO.CANCEL_HINT);
+        String current = io.passwordValid("Current password: ", accounts::checkCurrentPassword);
+        String next = io.passwordValid("New password: ", AccountService::checkPassword);
+        io.passwordValid("Confirm new password: ", v -> {
+            if (!v.equals(next)) {
+                throw new IllegalArgumentException("Passwords do not match; type the new password again");
+            }
+            return v;
+        });
         accounts.changePassword(current, next);
         io.info("Password changed.");
     }
 
-    /**
-     * 主负责人：Henry。
-     * 做什么：空输入表示保留原值。
-     */
-    private static String keep(String value, String current) {
-        return value.isEmpty() ? current : value;
-    }
 }

@@ -14,7 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 【Sprint 2 · US13 #48】主负责人：Yuhan。审核人：Sixian。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
+ *
+ * 【Sprint 2 · US13 #48】主负责人：Yuhan。
  * 测什么：编号显示、按数字分派、越界数字、非数字、空输入、别名和别名参数、隐藏选项、动作错误不退出菜单。
  */
 class MenuTest {
@@ -22,12 +25,18 @@ class MenuTest {
     private final StringWriter out = new StringWriter();
     private final List<String> calls = new ArrayList<>();
 
-    /** Creates a console helper reading the given lines. */
+    /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
+     * Creates a console helper reading the given lines.
+     */
     private ConsoleIO io(String... lines) {
         return new ConsoleIO(new Scanner(String.join("\n", lines) + "\n"), new PrintWriter(out, true));
     }
 
-    /** Builds a three-option menu that records which action ran. */
+    /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
+     * Builds a three-option menu that records which action ran.
+     */
     private Menu menu() {
         return new Menu("Test menu:", "Quit", "quit")
                 .option("First", "first", a -> calls.add("first:" + a))
@@ -38,6 +47,9 @@ class MenuTest {
                 });
     }
 
+    /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void rendersNumberedOptionsWithExitAsZero() {
         menu().render(io());
@@ -50,6 +62,9 @@ class MenuTest {
         assertFalse(text.contains("secret"));
     }
 
+    /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void numbersDispatchToTheMatchingAction() {
         Menu menu = menu();
@@ -60,6 +75,9 @@ class MenuTest {
         assertEquals(List.of("second:", "first:"), calls);
     }
 
+    /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void outOfRangeAndNonNumericInputShowErrorsWithoutRunning() {
         Menu menu = menu();
@@ -75,6 +93,9 @@ class MenuTest {
         assertTrue(calls.isEmpty());
     }
 
+    /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void aliasesAndArgumentsAreAcceptedCaseInsensitively() {
         Menu menu = menu();
@@ -85,6 +106,9 @@ class MenuTest {
         assertEquals(List.of("first:s1", "secret:"), calls);
     }
 
+    /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void failingActionShowsErrorAndKeepsMenuOpen() {
         Menu menu = menu();
@@ -92,6 +116,9 @@ class MenuTest {
         assertTrue(out.toString().contains("Error: Action failed"));
     }
 
+    /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void loopRedisplaysAfterEachActionUntilExit() {
         int[] rounds = {0};

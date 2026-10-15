@@ -23,7 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 【Sprint 2 · US10 #11】主负责人：Stella。审核人：Sixian。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Sixian
+ *
+ * 【Sprint 2 · US10 #11】主负责人：Stella。
  * 测什么：只列出自己的卷轴；改名、替换内容（格式更新、上传次数 +1、下载次数保留）、删除；
  * 不能编辑／删除别人的卷轴；删除后浏览不再出现；重启后修改仍在；修改后在列表中的位置不变。
  * （模型和仓库本身的测试在 Stella R1 的 ScrollStorageTest。）
@@ -50,6 +53,9 @@ class ScrollEditServiceTest {
     private ScrollService scrolls;
     private ScrollEditService edits;
 
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Sixian
+     */
     @BeforeEach
     void setUp() throws IOException {
         accounts = new AccountService(new FileUserRepository(directory.resolve("users.properties")), HASHER);
@@ -65,6 +71,9 @@ class ScrollEditServiceTest {
         accounts.login("m", "password123");
     }
 
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void listsOnlyOwnScrolls() {
         List<DigitalScroll> mine = edits.myScrolls();
@@ -72,6 +81,9 @@ class ScrollEditServiceTest {
         assertEquals("s1", mine.get(0).getScrollId());
     }
 
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void renameKeepsEverythingElseAndPersists() {
         edits.rename("s1", "  Renamed  ");
@@ -83,6 +95,9 @@ class ScrollEditServiceTest {
         assertEquals(1, restored.getUploadCount());
     }
 
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void renameRejectsDuplicateOrBlankNames() {
         assertEquals("Scroll name already exists",
@@ -92,6 +107,9 @@ class ScrollEditServiceTest {
         assertEquals("Mine", repository.findById("s1").orElseThrow().getName());
     }
 
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void replaceContentUpdatesFormatAndUploadCountButKeepsDownloads() throws IOException {
         scrolls.download("s1", directory.resolve("copy.txt"));
@@ -104,6 +122,9 @@ class ScrollEditServiceTest {
         assertEquals(1, updated.getDownloadCount());
     }
 
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void replaceContentRejectsMissingFileWithoutChanges() {
         assertThrows(IllegalArgumentException.class,
@@ -112,6 +133,9 @@ class ScrollEditServiceTest {
         assertEquals(1, repository.findById("s1").orElseThrow().getUploadCount());
     }
 
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void cannotEditOrDeleteOtherUsersScrolls() {
         assertEquals("You can only edit scrolls you uploaded",
@@ -123,6 +147,9 @@ class ScrollEditServiceTest {
         assertEquals("Theirs", repository.findById("s2").orElseThrow().getName());
     }
 
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void deleteRemovesScrollFromBrowseAndAfterRestart() {
         edits.delete("s1");
@@ -131,6 +158,9 @@ class ScrollEditServiceTest {
         assertEquals(1, scrolls.browse().size());
     }
 
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void missingScrollsAndGuestsAreRejected() {
         assertEquals("Scroll not found: nope",
@@ -140,9 +170,29 @@ class ScrollEditServiceTest {
         assertThrows(IllegalStateException.class, () -> edits.delete("s1"));
     }
 
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void updatingAScrollKeepsItsPositionInTheList() {
         edits.rename("s1", "Still first");
         assertEquals("s1", scrolls.browse().get(0).getScrollId());
+    }
+
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Sixian
+     */
+    @Test
+    void fieldChecksForEditing() {
+        assertEquals("s1", edits.checkEditable("s1").getScrollId());
+        assertEquals("You can only edit scrolls you uploaded",
+                assertThrows(IllegalArgumentException.class, () -> edits.checkEditable("s2")).getMessage());
+        assertThrows(IllegalArgumentException.class, () -> edits.checkEditable("missing"));
+        DigitalScroll mine = repository.findById("s1").orElseThrow();
+        assertEquals("Mine", edits.checkNewName(mine, " Mine "));
+        assertEquals("Scroll name 'Theirs' is already taken",
+                assertThrows(IllegalArgumentException.class, () -> edits.checkNewName(mine, "Theirs")).getMessage());
+        accounts.logout();
+        assertThrows(IllegalStateException.class, () -> edits.checkEditable("s1"));
     }
 }

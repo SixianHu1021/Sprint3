@@ -10,6 +10,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
+ *
  * Unit tests for the PBKDF2 password hashing implementation.
  *
  * <p>Verifies salted hashing, password verification, input validation,
@@ -18,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PasswordHasherTest {
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies that password hashes use random salts and can be
      * validated using the original password.
      */
@@ -44,6 +48,7 @@ class PasswordHasherTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies that malformed hashes and unsupported parameters
      * are rejected without causing authentication failures.
      */

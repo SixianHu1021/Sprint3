@@ -198,6 +198,12 @@ Previews show metadata plus format-specific content: the first lines of text
 files, image dimensions, PDF version and page count, ZIP entries, or a hex
 dump for other files.
 
+Logged-in users can also choose **Open in default app** on the preview screen to view
+PDFs, images (png, jpg, gif, bmp), text files (txt, md, csv) and Word documents (docx)
+in the computer's own application, such as Preview or Word. Other types (for example mp3
+or mp4) show the information preview only. Opening does not count as a download, and it
+needs a computer with a desktop (it is unavailable over SSH or in Docker).
+
 Logged-in users can download from the list or the preview screen. If the
 destination has no matching extension, the correct one is added (for example
 `report` becomes `report.pdf`). Successful downloads update the download count.
@@ -264,7 +270,7 @@ re-run and update at the end of the sprint):
 
 | Metric | Coverage |
 |--------|----------|
-| Tests | 190 passed, 0 failed |
+| Tests | 211 passed, 0 failed |
 | Line Coverage | 97% |
 | Branch Coverage | 92% |
 

@@ -28,7 +28,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 【Sprint 2 · US17 #52】主负责人：Sixian。审核人：Stella。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella
+ *
+ * 【Sprint 2 · US17 #52】主负责人：Sixian。
  * 测什么：上传时记录格式并在重启后保留；下载自动补正确扩展名、已有扩展名不重复、unknown 不改名、
  * 下载后格式仍在；预览按格式显示文本行、图片尺寸、PDF 信息、ZIP 条目、十六进制和空文件。
  */
@@ -52,6 +55,9 @@ class ScrollFormatTest {
     private FileScrollRepository repository;
     private ScrollService scrolls;
 
+    /**
+     * 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella
+     */
     @BeforeEach
     void setUp() {
         AccountService accounts = new AccountService(
@@ -62,11 +68,17 @@ class ScrollFormatTest {
         accounts.login("m", "password123");
     }
 
-    /** Creates an in-memory scroll with the given format. */
+    /**
+     * 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella
+     * Creates an in-memory scroll with the given format.
+     */
     private static DigitalScroll scroll(byte[] content, String format) {
         return new DigitalScroll("x", "X", content, "m", LocalDateTime.now(), 1, 0, format);
     }
 
+    /**
+     * 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void uploadRecordsFormatAndItSurvivesRestart() throws IOException {
         scrolls.upload("s1", "Report", Files.writeString(directory.resolve("report.PDF"), "%PDF-1.7"));
@@ -76,6 +88,9 @@ class ScrollFormatTest {
         assertEquals("unknown", restored.findById("s2").orElseThrow().getFileFormat());
     }
 
+    /**
+     * 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void downloadAddsMissingExtensionAndKeepsFormat() throws IOException {
         byte[] content = "%PDF-1.7 body".getBytes(StandardCharsets.ISO_8859_1);
@@ -90,6 +105,9 @@ class ScrollFormatTest {
         assertEquals(3, stored.getDownloadCount());
     }
 
+    /**
+     * 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void jpegAliasesAndUnknownFormatsKeepTheChosenName() throws IOException {
         scrolls.upload("j", "Photo", Files.write(directory.resolve("photo.jpg"), new byte[]{1}));
@@ -98,6 +116,9 @@ class ScrollFormatTest {
         assertEquals(directory.resolve("plain"), scrolls.download("u", directory.resolve("plain")));
     }
 
+    /**
+     * 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void folderDestinationIsRejected() throws IOException {
         scrolls.upload("s1", "Notes", Files.writeString(directory.resolve("n.txt"), "x"));
@@ -106,6 +127,9 @@ class ScrollFormatTest {
         assertEquals(0, repository.findById("s1").orElseThrow().getDownloadCount());
     }
 
+    /**
+     * 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void textPreviewShowsFirstLines() {
         String text = String.join("\n", "l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l10", "l11",
@@ -119,12 +143,18 @@ class ScrollFormatTest {
         assertTrue(longLine.contains("  | " + "y".repeat(120) + "..."));
     }
 
+    /**
+     * 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void nonTextContentWithTextExtensionFallsBackToHex() {
         List<String> lines = ScrollPreviewRenderer.render(scroll(new byte[]{0, 1}, "txt"));
         assertTrue(lines.contains("First 2 bytes (hex): 00 01"));
     }
 
+    /**
+     * 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void imagePreviewShowsDimensions() throws IOException {
         ByteArrayOutputStream png = new ByteArrayOutputStream();
@@ -135,6 +165,9 @@ class ScrollFormatTest {
         assertTrue(broken.contains("Image details unavailable."));
     }
 
+    /**
+     * 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void pdfPreviewShowsVersionAndPages() {
         String pdf = "%PDF-1.7\n1 0 obj << /Type /Pages >>\n2 0 obj << /Type /Page >>\n3 0 obj << /Type/Page >>";
@@ -144,6 +177,9 @@ class ScrollFormatTest {
         assertTrue(ScrollPreviewRenderer.render(scroll("junk".getBytes(), "pdf")).contains("PDF header not found."));
     }
 
+    /**
+     * 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void zipPreviewListsEntries() throws IOException {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -160,6 +196,9 @@ class ScrollFormatTest {
         assertTrue(ScrollPreviewRenderer.render(scroll(new byte[]{9, 9}, "zip")).contains("First 2 bytes (hex): 09 09"));
     }
 
+    /**
+     * 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void unknownAndEmptyPreviews() {
         List<String> unknown = ScrollPreviewRenderer.render(scroll(new byte[40], "unknown"));

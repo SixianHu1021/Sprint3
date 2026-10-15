@@ -11,6 +11,10 @@ import org.example.model.DigitalScroll;
 import org.example.repository.ScrollRepository;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r1-scroll-storage】实现：Stella ｜ 审核：Sixian
+ *   - Sprint 1 原作者：Stella（未标 PR 的方法本轮不改）
+ *
  * Persists scroll content, metadata and counters in a properties snapshot.
  * Binary content is stored as Base64. Updates memory only after saving succeeds.
  * Login and ownership checks belong to the service layer. Intended for a single
@@ -18,13 +22,14 @@ import org.example.repository.ScrollRepository;
  *
  * <p>Sprint 2 变更：【US17 #52】保存／读取 format；【US10 #11】deleteById；
  * save 改为原位替换（更新后不再移到列表末尾，“按上传顺序”排序因此稳定）。
- * 主负责人：Stella。审核人：Sixian。
+ * 主负责人：Stella。
  */
 public final class FileScrollRepository implements ScrollRepository {
     private final AtomicPropertiesStore store;
     private List<DigitalScroll> scrolls = new ArrayList<>();
 
     /**
+     * 【PR s2-r1-scroll-storage】实现：Stella ｜ 审核：Sixian
      * Loads scrolls from a snapshot; an absent file starts an empty repository.
      * Snapshots without counters load with 1 upload and 0 downloads.
      * @param file scroll snapshot path
@@ -57,6 +62,7 @@ public final class FileScrollRepository implements ScrollRepository {
     }
 
     /**
+     * 【PR s2-r1-scroll-storage】实现：Stella ｜ 审核：Sixian
      * Inserts a scroll or replaces the scroll with the same ID, saving before updating memory.
      * Content and both counters are written together.
      * @param scroll complete scroll to store
@@ -81,7 +87,8 @@ public final class FileScrollRepository implements ScrollRepository {
     }
 
     /**
-     * 【Sprint 2 · US10 #11】主负责人：Stella。审核人：Sixian。
+     * 【PR s2-r1-scroll-storage】实现：Stella ｜ 审核：Sixian
+     * 【Sprint 2 · US10 #11】主负责人：Stella。
      * 做什么：删除指定卷轴，先写文件成功再更新内存；不存在的 ID 保存原列表，不报错。
      * 对接／验证：ScrollEditService.delete 先检查所有者再调用；删除后浏览列表不再出现（MyScrollsTest 验证）。
      *
@@ -97,6 +104,7 @@ public final class FileScrollRepository implements ScrollRepository {
     }
 
     /**
+     * 【PR s2-r1-scroll-storage】实现：Stella ｜ 审核：Sixian
      * 【Sprint 2】主负责人：Stella。
      * 做什么：从 Sprint 1 的 save 中抽出的“整份快照写入”，save 与 deleteById 共用；新增 format 字段。
      * 对接／验证：旧数据没有 format 时读取为 unknown（构造方法中处理）。
@@ -123,6 +131,7 @@ public final class FileScrollRepository implements ScrollRepository {
     }
 
     /**
+     * 【PR s2-r1-scroll-storage】实现：Stella ｜ 审核：Sixian
      * 【Sprint 2】主负责人：Stella。
      * 做什么：返回卷轴在列表中的位置，用于原位替换。
      * 对接／验证：仅供 save 使用。
@@ -136,13 +145,17 @@ public final class FileScrollRepository implements ScrollRepository {
         return -1;
     }
 
-    /** @return an unmodifiable list of all stored scrolls */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * @return an unmodifiable list of all stored scrolls
+     */
     @Override
     public List<DigitalScroll> findAll() {
         return List.copyOf(scrolls);
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
      * Finds a scroll by its ID.
      * @param scrollId scroll ID to look up
      * @return the matching scroll, or empty if none exists
@@ -153,6 +166,7 @@ public final class FileScrollRepository implements ScrollRepository {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
      * Checks whether a scroll ID is already used.
      * @param scrollId scroll ID to check
      * @return true if a scroll has this ID
@@ -163,6 +177,7 @@ public final class FileScrollRepository implements ScrollRepository {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
      * Checks whether a scroll name is already used; comparison is case-sensitive.
      * @param name scroll name to check
      * @return true if a scroll has this name

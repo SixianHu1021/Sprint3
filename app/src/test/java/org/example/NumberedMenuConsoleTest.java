@@ -24,7 +24,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 【Sprint 2 · US13 #48 / US14 #49 / US15 #50】主负责人：Yuhan。审核人：Henry。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+ *
+ * 【Sprint 2 · US13 #48 / US14 #49 / US15 #50】主负责人：Yuhan。
  * 测什么：完整 ConsoleUi 只用数字完成访客 → 登录 → 上传 → 浏览 → 退出；三种角色共用编号一致；
  * 无效输入不崩溃且停留在同一菜单；登录时 ID 为空立即重问；有隐藏读取器时密码不出现在输出；
  * 管理员用第 7 项创建 MEMBER/ADMIN、第 9 项打开 Stella 的统计页（US12 端到端，Stella 审核）。
@@ -51,6 +54,9 @@ class NumberedMenuConsoleTest {
     private ScrollService scrolls;
     private FileScrollRepository repository;
 
+    /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+     */
     @BeforeEach
     void setUp() {
         users = new FileUserRepository(directory.resolve("users.properties"));
@@ -61,7 +67,10 @@ class NumberedMenuConsoleTest {
         accounts.register("m", "member", "password123", "Member", "member@example.com", "456");
     }
 
-    /** Runs the full console with scripted input. */
+    /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+     * Runs the full console with scripted input.
+     */
     private String cli(String... lines) {
         StringWriter out = new StringWriter();
         ConsoleIO io = new ConsoleIO(new Scanner(String.join("\n", lines) + "\n"), new PrintWriter(out, true));
@@ -69,6 +78,9 @@ class NumberedMenuConsoleTest {
         return out.toString();
     }
 
+    /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void wholeWorkflowUsesNumbersOnly() throws Exception {
         Path source = Files.writeString(directory.resolve("notes.txt"), "hello");
@@ -86,6 +98,9 @@ class NumberedMenuConsoleTest {
         assertTrue(transcript.contains("Goodbye."));
     }
 
+    /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void sharedOptionsHaveTheSameNumberForEveryRole() {
         String guest = cli("0");
@@ -108,6 +123,9 @@ class NumberedMenuConsoleTest {
         assertTrue(admin.contains("  9. Scroll statistics"));
     }
 
+    /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void invalidMenuInputShowsErrorAndRedisplaysSameMenu() {
         String transcript = cli("9", "hello", "", "0");
@@ -118,6 +136,9 @@ class NumberedMenuConsoleTest {
         assertTrue(transcript.contains("Goodbye."));
     }
 
+    /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void blankLoginIdIsRejectedImmediately() {
         String transcript = cli("3", "", "m", "password123", "0");
@@ -125,6 +146,9 @@ class NumberedMenuConsoleTest {
         assertTrue(transcript.contains("Logged in."));
     }
 
+    /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void maskedReaderKeepsPasswordOffScreen() {
         StringWriter out = new StringWriter();
@@ -135,6 +159,9 @@ class NumberedMenuConsoleTest {
         assertFalse(out.toString().contains("password123"));
     }
 
+    /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void missingEditServiceGivesClearError() {
         accounts.login("m", "password123");
@@ -143,12 +170,18 @@ class NumberedMenuConsoleTest {
         assertTrue(out.toString().contains("Error: Scroll editing is not available in this session"));
     }
 
+    /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void guestTypingMemberCommandsGetsLoginError() {
         String transcript = cli("profile", "my-scrolls", "logout", "stats", "0");
         assertEquals(4, transcript.split("Error: Please log in first", -1).length - 1);
     }
 
+    /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void adminCreatesBothRolesAndOpensStatisticsByNumber() {
         accounts.login("a", "secret123");

@@ -21,7 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 【Sprint 2 · US03 #4 / US12 #13 / US16 #51】主负责人：Henry。审核人：Yuhan。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
+ *
+ * 【Sprint 2 · US03 #4 / US12 #13 / US16 #51】主负责人：Henry。
  * 测什么：AccountScreens 页面本身（不依赖 ConsoleUi 合并）：查看资料、回车保留原值、修改并显示新值、
  * 重复邮箱提示、两次新密码不一致、修改密码成功；管理员表单用编号选择角色，错误角色重问。
  */
@@ -46,6 +49,9 @@ class ProfileConsoleTest {
     private AccountService accounts;
     private StringWriter out;
 
+    /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
+     */
     @BeforeEach
     void setUp() {
         users = new FileUserRepository(directory.resolve("users.properties"));
@@ -55,12 +61,18 @@ class ProfileConsoleTest {
         out = new StringWriter();
     }
 
-    /** Creates the screen with scripted input. */
+    /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
+     * Creates the screen with scripted input.
+     */
     private AccountScreens screens(String... lines) {
         return new AccountScreens(accounts,
                 new ConsoleIO(new Scanner(String.join("\n", lines) + "\n"), new PrintWriter(out, true)));
     }
 
+    /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
+     */
     @Test
     void profileShowsDetailsAndKeepsBlankFields() {
         accounts.login("m", "password123");
@@ -75,30 +87,47 @@ class ProfileConsoleTest {
         assertFalse(text.contains("test-only:"));
     }
 
+    /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
+     */
     @Test
     void duplicateEmailIsReportedAndProfileKept() {
         accounts.login("m", "password123");
-        screens("1", "", "ADMIN@example.com", "", "0").profile();
+        // Sprint 2 · US14（逐项检查）：重复邮箱立即提示并重问邮箱；回车保留原值。
+        screens("1", "", "ADMIN@example.com", "", "", "0").profile();
         assertTrue(out.toString().contains("Error: Email address is already registered to another account"));
+        assertTrue(out.toString().contains("Profile updated."));
         assertEquals("member@example.com", users.findByIdKey("m").orElseThrow().getEmail());
     }
 
+    /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
+     */
     @Test
     void passwordChangeNeedsMatchingConfirmation() {
         accounts.login("m", "password123");
-        screens("2", "password123", "NewPass456", "Different789",
-                "2", "password123", "NewPass456", "NewPass456", "0").profile();
+        // Sprint 2 · US14（逐项检查）：当前密码错误、新密码不合规、确认不一致都只重问该项。
+        screens("2", "wrong-password", "password123", "short", "NewPass456", "Different789", "NewPass456",
+                "0").profile();
         String text = out.toString();
-        assertTrue(text.contains("Error: New passwords do not match"));
+        assertTrue(text.contains("Error: Current password is incorrect"));
+        assertTrue(text.contains("Error: Password must contain 8-128 characters"));
+        assertTrue(text.contains("Error: Passwords do not match; type the new password again"));
         assertTrue(text.contains("Password changed."));
         assertTrue(HASHER.verify("NewPass456", users.findByIdKey("m").orElseThrow().getPasswordHash()));
     }
 
+    /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
+     */
     @Test
     void guestCannotOpenProfile() {
         assertThrows(IllegalStateException.class, () -> screens("0").profile());
     }
 
+    /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
+     */
     @Test
     void adminFormSelectsRoleByNumberAndRetriesInvalidRole() {
         accounts.login("a", "secret123");
@@ -109,10 +138,13 @@ class ProfileConsoleTest {
         assertEquals(UserRole.MEMBER, users.findByIdKey("c").orElseThrow().getRole());
     }
 
+    /**
+     * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
+     */
     @Test
     void blankRegistrationFieldIsRepromptedImmediately() {
         screens("", "n", "newbie", "password123", "Newbie", "n@example.com", "999").createAccount("register");
-        assertTrue(out.toString().contains("Error: ID key cannot be empty."));
+        assertTrue(out.toString().contains("Error: ID key cannot be empty"));
         assertTrue(users.existsByIdKey("n"));
     }
 }

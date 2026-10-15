@@ -25,7 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 【Sprint 2 · US12 #13】主负责人：Stella。审核人：Yuhan。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Yuhan
+ *   - 【PR s2-r3-my-scrolls-stats-screens】实现：Stella ｜ 审核：Yuhan
+ *
+ * 【Sprint 2 · US12 #13】主负责人：Stella。
  * 测什么：管理员看到每个卷轴的上传／下载次数和合计；浏览不改变数字；下载与替换文件会改变；
  * 访客和会员被拒绝；统计页面输出和空状态。
  * （通过主菜单第 7、9 项操作的端到端测试在 Yuhan R4 的 NumberedMenuConsoleTest。）
@@ -53,6 +57,9 @@ class StatisticsTest {
     private ScrollService scrolls;
     private StatisticsService statistics;
 
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Yuhan
+     */
     @BeforeEach
     void setUp() {
         users = new FileUserRepository(directory.resolve("users.properties"));
@@ -64,7 +71,10 @@ class StatisticsTest {
         accounts.register("m", "member", "password123", "Member", "member@example.com", "456");
     }
 
-    /** Uploads two scrolls as the member and downloads one twice. */
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Yuhan
+     * Uploads two scrolls as the member and downloads one twice.
+     */
     private void sampleActivity() throws IOException {
         accounts.login("m", "password123");
         scrolls.upload("s1", "One", Files.writeString(directory.resolve("one.txt"), "1"));
@@ -78,6 +88,9 @@ class StatisticsTest {
         accounts.login("a", "secret123");
     }
 
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Yuhan
+     */
     @Test
     void adminSeesPerScrollCountsAndTotals() throws IOException {
         sampleActivity();
@@ -94,6 +107,9 @@ class StatisticsTest {
         assertEquals(2, report.totalDownloads());
     }
 
+    /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Yuhan
+     */
     @Test
     void nonAdminsCannotViewStatistics() {
         assertEquals("Please log in first",
@@ -103,6 +119,9 @@ class StatisticsTest {
                 assertThrows(IllegalStateException.class, () -> statistics.report()).getMessage());
     }
 
+    /**
+     * 【PR s2-r3-my-scrolls-stats-screens】实现：Stella ｜ 审核：Yuhan
+     */
     @Test
     void screenPrintsTableAndTotals() throws IOException {
         sampleActivity();
@@ -115,6 +134,9 @@ class StatisticsTest {
         assertTrue(text.contains("Total: 2 scroll(s), 3 upload(s), 2 download(s)"));
     }
 
+    /**
+     * 【PR s2-r3-my-scrolls-stats-screens】实现：Stella ｜ 审核：Yuhan
+     */
     @Test
     void screenShowsEmptyState() {
         accounts.login("a", "secret123");

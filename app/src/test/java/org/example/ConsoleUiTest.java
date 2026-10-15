@@ -17,6 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
+ *   - Sprint 1 原作者：Yuhan（未标 PR 的方法本轮不改）
+ *
  * Tests role-aware console menus and account interactions.
  */
 class ConsoleUiTest {
@@ -43,6 +47,7 @@ class ConsoleUiTest {
     };
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Creates an isolated account service for each test.
      */
     @BeforeEach
@@ -62,6 +67,7 @@ class ConsoleUiTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Runs the console with scripted input and captures its output.
      *
      * @param script simulated console input
@@ -82,6 +88,7 @@ class ConsoleUiTest {
     }
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
      * Verifies that guests see only guest menu options.
      */
     @Test
@@ -99,6 +106,7 @@ class ConsoleUiTest {
     }
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
      * Verifies that members do not see administrator menu options.
      */
     @Test
@@ -115,6 +123,7 @@ class ConsoleUiTest {
     }
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
      * Verifies that administrators see account management options.
      */
     @Test
@@ -133,6 +142,7 @@ class ConsoleUiTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies successful ID-key authentication.
      */
     @Test
@@ -144,6 +154,7 @@ class ConsoleUiTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies that invalid credentials produce a consistent error.
      */
     @Test
@@ -161,6 +172,7 @@ class ConsoleUiTest {
     }
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
      * Verifies that logout restores the guest session.
      */
     @Test
@@ -175,6 +187,7 @@ class ConsoleUiTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies that members cannot invoke administrator commands
      * even when entering them manually.
      */
@@ -191,6 +204,7 @@ class ConsoleUiTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies that administrator user listings do not expose
      * password hashes.
      */
@@ -209,6 +223,7 @@ class ConsoleUiTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies that administrators can delete another user.
      */
     @Test
@@ -223,6 +238,7 @@ class ConsoleUiTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies that users cannot delete their own administrator account.
      */
     @Test

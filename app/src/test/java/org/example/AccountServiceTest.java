@@ -17,6 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
+ *
  * Tests authentication, session management, and administrator operations.
  */
 class AccountServiceTest {
@@ -44,6 +47,7 @@ class AccountServiceTest {
     };
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Creates an isolated repository and account service for each test.
      */
     @BeforeEach
@@ -53,6 +57,7 @@ class AccountServiceTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Creates and authenticates the initial administrator.
      */
     private void admin() {
@@ -63,6 +68,7 @@ class AccountServiceTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Registers a member account for authentication tests.
      *
      * @return the registered member
@@ -74,6 +80,7 @@ class AccountServiceTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies successful authentication, failed login, logout,
      * and invalidation of deleted accounts.
      */
@@ -119,6 +126,7 @@ class AccountServiceTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies initial administrator setup and account management.
      */
     @Test
@@ -173,6 +181,7 @@ class AccountServiceTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies that guests and members cannot perform
      * administrator operations.
      */
@@ -218,6 +227,7 @@ class AccountServiceTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies ID-key authentication, uniform error messages,
      * and session persistence until logout.
      */
@@ -258,6 +268,7 @@ class AccountServiceTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies that deleted accounts cannot authenticate,
      * including after the repository is reopened.
      */
@@ -287,6 +298,7 @@ class AccountServiceTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies that protected operations return the authenticated
      * user and reject unauthenticated access.
      */
@@ -315,6 +327,7 @@ class AccountServiceTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies that a successful login replaces the previous session
      * and a failed login clears the active session.
      */
@@ -347,6 +360,7 @@ class AccountServiceTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies that administrators can create accounts with
      * different roles and that each account can authenticate.
      */

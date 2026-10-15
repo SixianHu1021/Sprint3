@@ -9,7 +9,10 @@ import java.util.Set;
 import org.example.model.DigitalScroll;
 
 /**
- * 【Sprint 2 · US17 #52】主负责人：Sixian。审核人：Stella。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+ *
+ * 【Sprint 2 · US17 #52】主负责人：Sixian。
  * 做什么：判断卷轴的文件格式并分类（文本、图片、PDF、压缩包、其他二进制）。
  * 优先使用上传文件的扩展名；没有扩展名时检查文件开头的“魔数”；仍无法判断就是 unknown。
  * 对接／验证：ScrollService.upload（Sixian 在 R2 接入）和 Stella 的 ScrollEditService.replaceContent 都调用 detect；
@@ -17,7 +20,10 @@ import org.example.model.DigitalScroll;
  */
 public final class FileFormat {
 
-    /** How a format should be previewed. */
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     * How a format should be previewed.
+     */
     public enum Category { TEXT, IMAGE, PDF, ARCHIVE, BINARY, UNKNOWN }
 
     private static final Set<String> TEXT = Set.of("txt", "md", "csv", "json", "xml", "html", "htm",
@@ -27,12 +33,21 @@ public final class FileFormat {
     private static final Set<String> ARCHIVE = Set.of("zip", "jar", "gz", "tar", "7z", "rar");
 
     /**
+     * 【打开预览白名单】只有这些类型可以用电脑的默认应用打开（团队 10-16 决定，默认拒绝）。
+     * 不在名单里的类型（mp3、mp4、zip、exe、带宏的 docm 等）只显示信息预览，新类型无需改代码。
+     */
+    private static final Set<String> OPENABLE = Set.of("png", "jpg", "jpeg", "gif", "bmp",
+            "pdf", "txt", "md", "csv", "docx");
+
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * Prevents utility class instantiation.
      */
     private FileFormat() {
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：先看文件名扩展名（1–10 位字母数字，转小写），否则看内容开头，最后判断是否为 UTF-8 文本。
      * 对接／验证：FileFormatTest 覆盖扩展名、大小写、无扩展名的 PDF/PNG/JPG/GIF/ZIP、文本和 unknown。
@@ -69,6 +84,7 @@ public final class FileFormat {
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：把格式归类，决定预览方式。
      * 对接／验证：ScrollPreviewRenderer 使用。
@@ -97,6 +113,20 @@ public final class FileFormat {
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     * 【Sprint 2 · US17 #52 打开预览】主负责人：Sixian。
+     * 做什么：判断该格式是否在可打开白名单中。
+     * 对接／验证：ScrollViewer.open 调用；FileFormatTest 检查名单内外的例子。
+     *
+     * @param format lowercase format
+     * @return true if the format may be opened with a default application
+     */
+    public static boolean isOpenable(String format) {
+        return format != null && OPENABLE.contains(format.toLowerCase(Locale.ROOT));
+    }
+
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：生成给用户看的格式说明，例如 “PDF document (.pdf)”；无法判断时显示 “unknown”。
      * 对接／验证：浏览列表和预览页使用。
@@ -116,6 +146,7 @@ public final class FileFormat {
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：判断内容能否作为 UTF-8 文本显示（合法编码，且除换行／制表符外没有控制字符）。
      * 对接／验证：detect 与 ScrollPreviewRenderer 共用。
@@ -136,6 +167,7 @@ public final class FileFormat {
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：取出文件名最后一个点后的扩展名；路径分隔符之后才算文件名。
      * 对接／验证：“.gitignore”、“archive.”、超过 10 位或含符号的扩展名都视为没有扩展名。
@@ -155,6 +187,7 @@ public final class FileFormat {
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：比较文件开头的字节（魔数）。
      * 对接／验证：仅供 detect 使用。

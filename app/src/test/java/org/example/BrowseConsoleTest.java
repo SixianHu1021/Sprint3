@@ -24,7 +24,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 【Sprint 2 · US06 #7 / US17 #52 / US18 #53】主负责人：Sixian。审核人：Stella。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r3-browse-screen】实现：Sixian ｜ 审核：Stella
+ *
+ * 【Sprint 2 · US06 #7 / US17 #52 / US18 #53】主负责人：Sixian。
  * 测什么：BrowseScreen 页面本身：编号菜单、筛选后列表与标题、无结果空状态、清除筛选、
  * 按下载次数排序并在标题显示、预览显示格式内容、下载补扩展名并显示保存路径、访客看到“需要登录”。
  */
@@ -49,6 +52,9 @@ class BrowseConsoleTest {
     private ScrollService scrolls;
     private StringWriter out;
 
+    /**
+     * 【PR s2-r3-browse-screen】实现：Sixian ｜ 审核：Stella
+     */
     @BeforeEach
     void setUp() throws IOException {
         accounts = new AccountService(new FileUserRepository(directory.resolve("users.properties")), HASHER);
@@ -65,13 +71,19 @@ class BrowseConsoleTest {
         out = new StringWriter();
     }
 
-    /** Runs the browse screen with scripted input. */
+    /**
+     * 【PR s2-r3-browse-screen】实现：Sixian ｜ 审核：Stella
+     * Runs the browse screen with scripted input.
+     */
     private String run(String... lines) {
         ConsoleIO io = new ConsoleIO(new Scanner(String.join("\n", lines) + "\n"), new PrintWriter(out, true));
         new BrowseScreen(scrolls, new ScrollQueryService(scrolls), accounts, io).show();
         return out.toString();
     }
 
+    /**
+     * 【PR s2-r3-browse-screen】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void showsNumberedMenuAndHeader() {
         String text = run("0");
@@ -86,6 +98,9 @@ class BrowseConsoleTest {
         assertTrue(text.contains("  0. Back"));
     }
 
+    /**
+     * 【PR s2-r3-browse-screen】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void filterByUploaderThenClear() {
         String text = run("3", "1", "H", "5", "0");
@@ -98,6 +113,9 @@ class BrowseConsoleTest {
         assertEquals(3, text.split("Available scrolls:", -1).length - 1);
     }
 
+    /**
+     * 【PR s2-r3-browse-screen】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void filtersByIdNameAndDateAndShowsEmptyState() {
         String today = java.time.LocalDate.now(Clock.systemUTC()).toString();
@@ -108,6 +126,9 @@ class BrowseConsoleTest {
         assertTrue(text.contains("Error: Upload date must use the format yyyy-MM-dd"));
     }
 
+    /**
+     * 【PR s2-r3-browse-screen】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void sortByDownloadCountShowsOrderInHeader() {
         String text = run("4", "2", "0");
@@ -117,6 +138,9 @@ class BrowseConsoleTest {
         assertTrue(sorted.indexOf("s3 | Python Notes") < sorted.indexOf("s1 | Java Notes"));
     }
 
+    /**
+     * 【PR s2-r3-browse-screen】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void previewShowsFormatAwareContentAndDownloadAddsExtension() {
         Path destination = directory.resolve("from-preview");
@@ -129,6 +153,9 @@ class BrowseConsoleTest {
         assertTrue(Files.exists(directory.resolve("from-preview.txt")));
     }
 
+    /**
+     * 【PR s2-r3-browse-screen】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void guestSeesLoginRequiredAndCannotDownload() {
         accounts.logout();
@@ -140,6 +167,9 @@ class BrowseConsoleTest {
         assertFalse(text.contains("Destination file path:"));
     }
 
+    /**
+     * 【PR s2-r3-browse-screen】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void emptyLibraryShowsMessage() throws IOException {
         ScrollService empty = new ScrollService(new FileScrollRepository(directory.resolve("empty.properties")),

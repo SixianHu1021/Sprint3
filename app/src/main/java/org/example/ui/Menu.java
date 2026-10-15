@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * 【Sprint 2 · US13 #48】主负责人：Yuhan。审核人：Sixian、Stella（各自页面使用者）。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
+ *
+ * 【Sprint 2 · US13 #48】主负责人：Yuhan。
  * 做什么：通用编号菜单。显示 “1. Browse scrolls … 0. Quit”，读取编号并调用对应动作；
  * 也接受 Sprint 1 的命令词（如 browse、preview s1）作为别名，旧脚本与习惯仍可用。
  * 对接／验证：主菜单、浏览页、预览页、我的卷轴、个人资料等全部用本类，保证编号格式一致；
@@ -15,6 +18,7 @@ import java.util.Locale;
 public final class Menu {
 
     /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：菜单项要执行的动作；argument 是别名后面的参数（例如 “preview s1” 中的 s1），没有就是空字符串。
      * 对接／验证：各页面负责人写自己的动作，不在这里写业务规则。
@@ -31,6 +35,7 @@ public final class Menu {
     }
 
     /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：一个菜单项：显示文字、可选别名、动作。
      * 对接／验证：hidden 项不编号也不显示，但可以用别名输入；权限仍由服务层检查（例如会员手动输入 users 会被拒绝）。
@@ -49,6 +54,7 @@ public final class Menu {
     private final List<Option> options = new ArrayList<>();
 
     /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：创建菜单；选项 0 固定为退出／返回。
      * 对接／验证：主菜单用 “Quit/quit”，子页面用 “Back/back”。
@@ -64,6 +70,7 @@ public final class Menu {
     }
 
     /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：增加一个显示并编号的选项。
      * 对接／验证：按加入顺序编号 1、2、3…；需要固定编号的共用选项应先加入。
@@ -79,6 +86,7 @@ public final class Menu {
     }
 
     /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：增加一个不显示、只能用别名触发的选项（例如访客菜单里的 upload）。
      * 对接／验证：用于保留 Sprint 1 命令词并给出清楚的权限错误，不用于隐藏正常功能。
@@ -93,6 +101,7 @@ public final class Menu {
     }
 
     /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：打印标题和 “  1. xxx” 形式的编号选项，最后打印 “  0. Quit/Back”。
      * 对接／验证：ConsoleUiTest/MenuTest 检查这种格式。
@@ -109,6 +118,7 @@ public final class Menu {
     }
 
     /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：显示菜单、读取一次选择并执行。返回 false 表示用户选了 0（退出／返回）。
      * 动作抛出的 IllegalArgumentException / IllegalStateException / IOException 统一显示为 “Error: …”，
@@ -134,6 +144,9 @@ public final class Menu {
         }
         try {
             selection.option().action().run(selection.argument());
+        } catch (InputCancelledException e) {
+            // 用户在表单中输入 cancel：不是错误，回到当前菜单。
+            io.info(e.getMessage());
         } catch (IllegalArgumentException | IllegalStateException | IOException e) {
             io.error(e.getMessage());
         }
@@ -141,6 +154,7 @@ public final class Menu {
     }
 
     /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：把输入解析成选项：数字按编号；否则按别名匹配第一个词，剩余部分作为参数。
      * 对接／验证：空输入、越界数字、未知文字都抛出 IllegalArgumentException，消息说明可选范围。
@@ -186,6 +200,7 @@ public final class Menu {
     }
 
     /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：返回需要编号显示的选项。
      * 对接／验证：render 与 select 使用同一份列表，编号不会错位。
@@ -195,6 +210,7 @@ public final class Menu {
     }
 
     /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：解析结果：选中的项和别名参数。
      * 对接／验证：仅供本类与 MenuTest 使用。
@@ -206,6 +222,7 @@ public final class Menu {
     }
 
     /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：一直运行菜单直到用户选择 0。
      * 对接／验证：子页面（浏览、我的卷轴、资料）直接调用；主菜单因每轮角色可能变化，由 ConsoleUi 每轮重新建菜单。

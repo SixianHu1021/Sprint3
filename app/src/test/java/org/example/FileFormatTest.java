@@ -8,12 +8,18 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 【Sprint 2 · US17 #52】主负责人：Sixian。审核人：Stella。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+ *
+ * 【Sprint 2 · US17 #52】主负责人：Sixian。
  * 测什么：扩展名优先且转小写；路径和隐藏文件；无扩展名时按魔数识别 PDF/PNG/JPG/GIF/ZIP；
  * 纯文本识别为 txt；无法判断为 unknown；分类与描述文字。
  */
 class FileFormatTest {
 
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void extensionWinsAndIsLowercased() {
         assertEquals("pdf", FileFormat.detect("Report.PDF", new byte[]{1, 2}));
@@ -21,6 +27,9 @@ class FileFormatTest {
         assertEquals("txt", FileFormat.detect("C:\\notes\\a.TXT", null));
     }
 
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void invalidExtensionsFallBackToContent() {
         assertEquals("txt", FileFormat.detect(".gitignore", "build/".getBytes()));
@@ -29,6 +38,9 @@ class FileFormatTest {
         assertEquals("unknown", FileFormat.detect("x.abcdefghijk", null));
     }
 
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void magicNumbersIdentifyCommonFormats() {
         assertEquals("pdf", FileFormat.detect("noext", "%PDF-1.7".getBytes()));
@@ -42,6 +54,9 @@ class FileFormatTest {
         assertEquals("unknown", FileFormat.detect(null, new byte[]{(byte) 0xC3}));
     }
 
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void categoriesAndDescriptions() {
         assertEquals(FileFormat.Category.TEXT, FileFormat.category("md"));
@@ -59,6 +74,9 @@ class FileFormatTest {
         assertEquals("unknown", FileFormat.describe("unknown"));
     }
 
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void textDetection() {
         assertTrue(FileFormat.isText("héllo\r\n".getBytes(java.nio.charset.StandardCharsets.UTF_8)));

@@ -15,7 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 【Sprint 2 · US16 #51】主负责人：Henry。审核人：Yuhan。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+ *
+ * 【Sprint 2 · US16 #51】主负责人：Henry。
  * 测什么：注册、管理员添加、修改资料三种入口都拒绝重复邮箱／电话；错误消息说明是哪一个字段；
  * 邮箱比较不区分大小写并以小写保存；电话比较忽略空格和分隔符；仓库查找方法本身。
  */
@@ -39,6 +42,9 @@ class DuplicateContactTest {
     private FileUserRepository users;
     private AccountService accounts;
 
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     */
     @BeforeEach
     void setUp() {
         users = new FileUserRepository(directory.resolve("users.properties"));
@@ -46,6 +52,9 @@ class DuplicateContactTest {
         accounts.bootstrapAdmin("a", "admin", "secret123", "Admin", "Admin@Example.com", "+61 400 000 000");
     }
 
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     */
     @Test
     void registrationRejectsDuplicateEmailIgnoringCase() {
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
@@ -54,6 +63,9 @@ class DuplicateContactTest {
         assertEquals(1, users.findAll().size());
     }
 
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     */
     @Test
     void registrationRejectsDuplicatePhoneIgnoringSeparators() {
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
@@ -61,6 +73,9 @@ class DuplicateContactTest {
         assertTrue(error.getMessage().startsWith("Phone number is already registered"));
     }
 
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     */
     @Test
     void emailIsStoredInLowercase() {
         assertEquals("admin@example.com", users.findByIdKey("a").orElseThrow().getEmail());
@@ -68,6 +83,9 @@ class DuplicateContactTest {
                 accounts.register("m", "member", "password123", "M", "M@Example.COM", "111").getEmail());
     }
 
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     */
     @Test
     void adminCreatedUsersFollowTheSameRules() {
         accounts.login("a", "secret123");
@@ -79,6 +97,9 @@ class DuplicateContactTest {
         assertEquals(2, users.findAll().size());
     }
 
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     */
     @Test
     void profileUpdateCannotTakeAnotherUsersContacts() {
         accounts.register("m", "member", "password123", "M", "m@example.com", "111");
@@ -90,6 +111,9 @@ class DuplicateContactTest {
         assertEquals("m@example.com", users.findByIdKey("m").orElseThrow().getEmail());
     }
 
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     */
     @Test
     void repositoryLookupsHandleMissingValues() {
         assertTrue(users.findByEmail(null).isEmpty());
@@ -98,6 +122,9 @@ class DuplicateContactTest {
         assertEquals("a", users.findByPhone("(+61) 400.000.000").orElseThrow().getIdKey());
     }
 
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     */
     @Test
     void phoneFormatIsValidated() {
         assertEquals("+61 (2) 9000-0000", ContactValidator.phone(" +61 (2) 9000-0000 "));

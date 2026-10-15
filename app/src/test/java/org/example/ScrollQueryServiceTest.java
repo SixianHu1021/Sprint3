@@ -23,7 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 【Sprint 2 · US06 #7 / US18 #53】主负责人：Sixian。审核人：Stella。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+ *
+ * 【Sprint 2 · US06 #7 / US18 #53】主负责人：Sixian。
  * 测什么：按上传者、卷轴 ID、名称、上传日期分别筛选（不区分大小写）、组合筛选、清除筛选回到完整列表、
  * 无结果为空列表；按下载次数从多到少排序，平局按上传日期从新到旧；空列表排序；日期解析错误提示。
  * 使用测试目录内的内存仓库，避免依赖上传时间。
@@ -42,7 +45,10 @@ class ScrollQueryServiceTest {
         }
     };
 
-    /** Test-only in-memory repository with fixed dates and counters. */
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     * Test-only in-memory repository with fixed dates and counters.
+     */
     private static final class MemoryRepository implements ScrollRepository {
         private final List<DigitalScroll> items;
 
@@ -86,11 +92,17 @@ class ScrollQueryServiceTest {
 
     private ScrollQueryService query;
 
-    /** Creates a scroll with a fixed date and download count. */
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     * Creates a scroll with a fixed date and download count.
+     */
     private static DigitalScroll scroll(String id, String name, String uploader, String date, long downloads) {
         return new DigitalScroll(id, name, new byte[]{1}, uploader, LocalDateTime.parse(date), 1, downloads, "txt");
     }
 
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     */
     @BeforeEach
     void setUp() {
         List<DigitalScroll> items = List.of(
@@ -104,11 +116,17 @@ class ScrollQueryServiceTest {
                 java.time.Clock.systemUTC()));
     }
 
-    /** Extracts IDs in result order. */
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     * Extracts IDs in result order.
+     */
     private static List<String> ids(List<DigitalScroll> scrolls) {
         return scrolls.stream().map(DigitalScroll::getScrollId).toList();
     }
 
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void eachFilterWorksIndividually() {
         ScrollFilter none = ScrollFilter.none();
@@ -120,6 +138,9 @@ class ScrollQueryServiceTest {
                 ids(query.search(none.withUploadDate(LocalDate.parse("2026-10-17")), SortOrder.UPLOAD_ORDER)));
     }
 
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void filtersCombineAndClearingReturnsFullList() {
         ScrollFilter both = ScrollFilter.none().withUploaderId("henry").withName("python");
@@ -130,17 +151,26 @@ class ScrollQueryServiceTest {
         assertEquals(4, query.search(null, SortOrder.UPLOAD_ORDER).size());
     }
 
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void noMatchesGivesEmptyList() {
         assertTrue(query.search(ScrollFilter.none().withName("rust"), SortOrder.UPLOAD_ORDER).isEmpty());
     }
 
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void sortByDownloadsIsDescendingWithNewestFirstOnTies() {
         assertEquals(List.of("beta-2", "gamma-3", "alpha-1", "delta-4"),
                 ids(query.search(ScrollFilter.none(), SortOrder.MOST_DOWNLOADED)));
     }
 
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void otherSortOrders() {
         assertEquals(List.of("alpha-1", "beta-2", "gamma-3", "delta-4"),
@@ -150,6 +180,9 @@ class ScrollQueryServiceTest {
         assertTrue(query.search(ScrollFilter.none().withName("none"), SortOrder.MOST_DOWNLOADED).isEmpty());
     }
 
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void describeShowsActiveConditions() {
         assertEquals("none", ScrollFilter.none().describe());
@@ -160,6 +193,9 @@ class ScrollQueryServiceTest {
         assertEquals("download count (most downloaded first)", SortOrder.MOST_DOWNLOADED.label());
     }
 
+    /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+     */
     @Test
     void dateParsing() {
         assertEquals(LocalDate.parse("2026-10-20"), ScrollQueryService.parseDate(" 2026-10-20 "));

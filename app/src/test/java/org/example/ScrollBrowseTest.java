@@ -17,6 +17,11 @@ import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+ *
+ */
 class ScrollBrowseTest {
 
     @TempDir
@@ -28,6 +33,9 @@ class ScrollBrowseTest {
     private static final LocalDateTime DATE =
             LocalDateTime.of(2026, 10, 10, 12, 0);
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @BeforeEach
     void setUp() {
         repository = new FileScrollRepository(
@@ -39,6 +47,9 @@ class ScrollBrowseTest {
         service = new ScrollService(repository, accounts, Clock.systemDefaultZone());
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     private DigitalScroll createScroll(
             String id, String name, String uploader) {
         return new DigitalScroll(
@@ -46,11 +57,17 @@ class ScrollBrowseTest {
                 uploader, DATE);
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void browseEmptyRepository() {
         assertTrue(service.browse().isEmpty());
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void browseMultipleScrolls() {
         repository.save(createScroll("s1", "Java Notes", "u1"));
@@ -65,6 +82,9 @@ class ScrollBrowseTest {
                 s -> s.getScrollId().equals("s2")));
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void previewReturnsCorrectMetadata() {
         repository.save(createScroll("s1", "Java Notes", "u1"));
@@ -77,12 +97,18 @@ class ScrollBrowseTest {
         assertEquals(DATE, preview.getUploadDate());
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void previewRejectsMissingScroll() {
         assertThrows(IllegalArgumentException.class,
                 () -> service.preview("missing"));
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void previewRejectsInvalidId() {
         assertThrows(IllegalArgumentException.class,
@@ -92,6 +118,9 @@ class ScrollBrowseTest {
                 () -> service.preview(" "));
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void browsingAndPreviewDoNotChangeCounters() {
         DigitalScroll scroll = new DigitalScroll(
@@ -113,6 +142,9 @@ class ScrollBrowseTest {
         assertEquals(5, restored.getDownloadCount());
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void browsingWorksWithoutLogin() {
         repository.save(createScroll("s1", "Public Scroll", "u1"));

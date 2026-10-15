@@ -21,6 +21,11 @@ import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
+ *   - 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+ *   - Sprint 1 原作者：Sixian（未标 PR 的方法本轮不改）
+ *
  * Tests scroll operations through the console interface.
  */
 class ScrollConsoleTest {
@@ -44,6 +49,9 @@ class ScrollConsoleTest {
     private FileScrollRepository repository;
     private ScrollService scrolls;
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @BeforeEach
     void setUp() {
         accounts = new AccountService(
@@ -65,6 +73,7 @@ class ScrollConsoleTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
      * Runs the console using scripted input and captures its output.
      */
     private String cli(String... lines) {
@@ -80,6 +89,9 @@ class ScrollConsoleTest {
         return result.toString();
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void memberCanUploadThroughConsole() throws IOException {
         byte[] content = {0, 1, -1, 127};
@@ -100,6 +112,9 @@ class ScrollConsoleTest {
         assertEquals(0, stored.getDownloadCount());
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void administratorCanUploadThroughConsole() throws IOException {
         Path source = Files.write(
@@ -115,6 +130,9 @@ class ScrollConsoleTest {
                 .orElseThrow().getUploaderId());
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void guestCannotUploadThroughConsole() throws IOException {
         Path source = Files.write(
@@ -131,6 +149,9 @@ class ScrollConsoleTest {
         assertTrue(transcript.contains("Logged in."));
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void invalidUploadShowsErrorAndDoesNotSave() {
         String transcript = cli(
@@ -145,6 +166,9 @@ class ScrollConsoleTest {
         assertTrue(transcript.contains("Goodbye."));
     }
 
+    /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
+     */
     @Test
     void uploadAppearsOnlyInAuthenticatedMenus() {
         // Sprint 2 · US13（Yuhan）：上传在会员／管理员菜单都是第 2 项，访客菜单没有上传。
@@ -165,6 +189,7 @@ class ScrollConsoleTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
      * Guests can browse and preview a scroll without logging in.
      */
     @Test
@@ -194,6 +219,7 @@ class ScrollConsoleTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
      * Returning from preview reopens the browse list,
      * and returning from browse reopens the main menu.
      */
@@ -220,6 +246,7 @@ class ScrollConsoleTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
      * Invalid IDs produce an error without ending the browse session.
      */
     @Test
@@ -245,6 +272,7 @@ class ScrollConsoleTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
      * Previewing does not modify the persisted download counter.
      */
     @Test
@@ -263,6 +291,7 @@ class ScrollConsoleTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
      * A logged-in member can download directly from the browse list.
      */
     @Test
@@ -287,6 +316,7 @@ class ScrollConsoleTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
      * A logged-in member can download from the preview screen.
      */
     @Test
@@ -313,6 +343,7 @@ class ScrollConsoleTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
      * Guests cannot download from browsing or preview.
      */
     @Test
@@ -343,6 +374,7 @@ class ScrollConsoleTest {
     }
 
     /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry（R4 起浏览页由 Sixian 的 BrowseScreen 提供，Sixian 确认）
      * A failed download does not display success or change counters.
      */
     @Test
@@ -355,10 +387,13 @@ class ScrollConsoleTest {
                 "upload", "s1", "Notes", source.toString(),
                 "browse",
                 "download s1", directory.toString(),
+                "cancel",
                 "back",
                 "quit");
 
-        assertTrue(transcript.contains("Error:"));
+        // Sprint 2 · US14（逐项检查）：文件夹路径立即提示并重问；cancel 返回浏览页。
+        assertTrue(transcript.contains("Error: Destination must be a file path, not a folder"));
+        assertTrue(transcript.contains("Cancelled."));
         assertFalse(transcript.contains("Scroll downloaded successfully."));
         assertEquals(0, repository.findById("s1")
                 .orElseThrow().getDownloadCount());
@@ -366,6 +401,7 @@ class ScrollConsoleTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
      * Users can continue browsing after a successful download.
      */
     @Test

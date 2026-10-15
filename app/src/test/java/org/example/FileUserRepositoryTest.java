@@ -13,6 +13,9 @@ import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+ *
  * Verifies user storage independently of authentication and console services.
  * Adapted from the persistence scenarios in SprintOneTest. Password hashes are
  * fixture values; these tests do not verify password hashing or registration rules.
@@ -22,19 +25,28 @@ class FileUserRepositoryTest {
     private Path snapshot;
     private FileUserRepository users;
 
-    /** Creates a separate temporary repository for each test. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Creates a separate temporary repository for each test.
+     */
     @BeforeEach
     void setup() {
         snapshot = directory.resolve("users.properties");
         users = new FileUserRepository(snapshot);
     }
 
-    /** Supplies a complete profile with a placeholder hash for storage tests. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Supplies a complete profile with a placeholder hash for storage tests.
+     */
     private User member() {
         return new User("m", "member", "fixture-hash", "Member", "member@example.com", "456", UserRole.MEMBER);
     }
 
-    /** An absent snapshot starts an empty repository and lookups report absence. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * An absent snapshot starts an empty repository and lookups report absence.
+     */
     @Test
     void missingSnapshotStartsEmpty() {
         assertTrue(users.findAll().isEmpty());
@@ -44,7 +56,10 @@ class FileUserRepositoryTest {
         assertFalse(users.existsByUsername("missing"));
     }
 
-    /** Every profile field survives reopening; returned lists cannot be modified. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Every profile field survives reopening; returned lists cannot be modified.
+     */
     @Test
     void savedProfileSurvivesRestart() {
         users.save(member());
@@ -62,7 +77,10 @@ class FileUserRepositoryTest {
         assertThrows(UnsupportedOperationException.class, () -> reopened.findAll().clear());
     }
 
-    /** Saving the same ID updates its profile; a conflicting username is rejected. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Saving the same ID updates its profile; a conflicting username is rejected.
+     */
     @Test
     void upsertsAndRejectsNameCollisions() {
         users.save(member());
@@ -82,7 +100,10 @@ class FileUserRepositoryTest {
         assertEquals(UserRole.ADMIN, restored.getRole());
     }
 
-    /** Deletion survives reopening and an absent ID leaves existing users intact. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Deletion survives reopening and an absent ID leaves existing users intact.
+     */
     @Test
     void deletionPersistsAndMissingIdIsHarmless() {
         users.save(member());
@@ -93,7 +114,10 @@ class FileUserRepositoryTest {
         assertFalse(new FileUserRepository(snapshot).existsByIdKey("m"));
     }
 
-    /** A file in place of the parent directory prevents saving without adding a user. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * A file in place of the parent directory prevents saving without adding a user.
+     */
     @Test
     void failedInsertLeavesMemoryUnchanged() throws IOException {
         Path blocker = directory.resolve("blocker");
@@ -103,7 +127,10 @@ class FileUserRepositoryTest {
         assertTrue(blocked.findAll().isEmpty());
     }
 
-    /** Failed updates and deletions preserve both memory and the original disk snapshot. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Failed updates and deletions preserve both memory and the original disk snapshot.
+     */
     @Test
     void failedMutationsPreserveExistingUsers() throws IOException {
         users.save(member());
@@ -118,7 +145,10 @@ class FileUserRepositoryTest {
         assertEquals("member", new FileUserRepository(backup).findByIdKey("m").orElseThrow().getUsername());
     }
 
-    /** Invalid counts, missing fields and invalid property escapes fail explicitly. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Invalid counts, missing fields and invalid property escapes fail explicitly.
+     */
     @Test
     void corruptedSnapshotsAreRejected() throws IOException {
         Path bad = directory.resolve("bad.properties");
@@ -130,7 +160,10 @@ class FileUserRepositoryTest {
         assertThrows(IllegalStateException.class, () -> new FileUserRepository(directory));
     }
 
-    /** Duplicate IDs or usernames in stored records are rejected at startup. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Duplicate IDs or usernames in stored records are rejected at startup.
+     */
     @Test
     void duplicateSnapshotRecordsAreRejected() throws IOException {
         users.save(member());

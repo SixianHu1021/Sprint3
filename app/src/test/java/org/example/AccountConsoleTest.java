@@ -16,7 +16,13 @@ import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Tests account forms through scripted console input and persistent storage. */
+/**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+ *   - Sprint 1 原作者：Henry（未标 PR 的方法本轮不改）
+ *
+ * Tests account forms through scripted console input and persistent storage.
+ */
 class AccountConsoleTest {
     @TempDir
     Path directory;
@@ -24,14 +30,20 @@ class AccountConsoleTest {
     private AccountService accounts;
     private final Pbkdf2PasswordHasher hasher = new Pbkdf2PasswordHasher();
 
-    /** Creates isolated storage without a preconfigured administrator. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Creates isolated storage without a preconfigured administrator.
+     */
     @BeforeEach
     void setUp() {
         users = new FileUserRepository(directory.resolve("users.properties"));
         accounts = new AccountService(users, hasher);
     }
 
-    /** Runs the public console workflow and captures its output. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Runs the public console workflow and captures its output.
+     */
     private String cli(String... lines) {
         StringWriter output = new StringWriter();
         new ConsoleUi(accounts, null, new Scanner(String.join("\n", lines) + "\n"),
@@ -39,11 +51,17 @@ class AccountConsoleTest {
         return output.toString();
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     */
     private void admin() {
         accounts.bootstrapAdmin("a", "admin", "secret123", "Admin", "admin@example.com", "123");
     }
 
-    /** Verifies first-run setup persists an administrator without logging in. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Verifies first-run setup persists an administrator without logging in.
+     */
     @Test
     void bootstrapPersistsAdministrator() {
         String transcript = cli("a", "admin", "secret123", "Admin", "admin@example.com", "123", "quit");
@@ -54,7 +72,10 @@ class AccountConsoleTest {
         assertTrue(transcript.contains("Account created."));
     }
 
-    /** Verifies profile fields, password hashing, persistence, and subsequent login. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Verifies profile fields, password hashing, persistence, and subsequent login.
+     */
     @Test
     void registrationPersistsProfileAndAllowsLogin() throws Exception {
         admin();
@@ -73,7 +94,10 @@ class AccountConsoleTest {
         assertFalse(transcript.contains(member.getPasswordHash()));
     }
 
-    /** Verifies administrators can create both supported roles through the form. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Verifies administrators can create both supported roles through the form.
+     */
     @Test
     void administratorCreatesMemberAndAdministrator() {
         admin();
@@ -85,7 +109,10 @@ class AccountConsoleTest {
         assertEquals(UserRole.ADMIN, restored.findByIdKey("b").orElseThrow().getRole());
     }
 
-    /** Verifies unauthorized account creation is rejected before reading profile fields. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Verifies unauthorized account creation is rejected before reading profile fields.
+     */
     @Test
     void guestAndMemberCannotCreateAdministrativeAccounts() {
         admin();
@@ -97,29 +124,40 @@ class AccountConsoleTest {
         assertFalse(transcript.contains("Full name:"));
     }
 
-    /** Verifies invalid setup can be retried without creating a partial account. */
+    /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry（R4 起注册表单由 Henry 的 AccountScreens 提供，Henry 确认）
+     * Verifies invalid setup can be retried without creating a partial account.
+     */
     @Test
     void bootstrapRetriesInvalidProfile() {
-        String transcript = cli("a", "admin", "short", "Admin", "admin@example.com", "123",
-                "a", "admin", "secret123", "Admin", "admin@example.com", "123", "quit");
+        // Sprint 2 · US14（逐项检查）：密码不合规时只重问密码。
+        String transcript = cli("a", "admin", "short", "secret123", "Admin", "admin@example.com", "123", "quit");
         assertTrue(transcript.contains("Password must contain"));
         assertEquals(1, users.findAll().size());
         assertFalse(accounts.needsBootstrap());
     }
 
-    /** Verifies duplicate registration is rejected and the menu remains usable. */
+    /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry（R4 起注册表单由 Henry 的 AccountScreens 提供，Henry 确认）
+     * Verifies duplicate registration is rejected and the menu remains usable.
+     */
     @Test
     void duplicateRegistrationDoesNotOverwriteAccount() {
         admin();
-        String transcript = cli("register", "a", "different", "password123", "Other",
-                "other@example.com", "456", "quit");
-        assertTrue(transcript.contains("ID key or username already exists"));
+        // Sprint 2 · US14（逐项检查）：重复 ID 在输入当时就提示并重问；cancel 放弃表单。
+        String transcript = cli("register", "a", "cancel", "quit");
+        assertTrue(transcript.contains("Error: ID key 'a' is already taken"));
+        assertTrue(transcript.contains("Cancelled."));
+        assertFalse(transcript.contains("Username: "));
         assertEquals(1, users.findAll().size());
         assertEquals("admin", users.findByIdKey("a").orElseThrow().getUsername());
         assertTrue(transcript.contains("Goodbye."));
     }
 
-    /** Verifies an unsupported role does not save an account. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Verifies an unsupported role does not save an account.
+     */
     @Test
     void invalidAdministratorSelectedRoleDoesNotSave() {
         admin();
@@ -129,7 +167,10 @@ class AccountConsoleTest {
         assertFalse(users.existsByIdKey("b"));
     }
 
-    /** Verifies incomplete setup exits gracefully without saving partial input. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Verifies incomplete setup exits gracefully without saving partial input.
+     */
     @Test
     void incompleteBootstrapDoesNotSave() {
         String transcript = cli("a", "admin");

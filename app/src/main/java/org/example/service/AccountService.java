@@ -8,14 +8,20 @@ import org.example.repository.UserRepository;
 import org.example.security.PasswordHasher;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+ *   - Sprint 1 原作者：Henry（注册）、Yuhan（登录与管理员）（未标 PR 的方法本轮不改）
+ *
  * Registers member profiles using injected storage and password hashing.
  *
  * <p>Sprint 2 变更一览（其余方法为 Sprint 1 原有，本轮不改）：
  * <ul>
- *   <li>【US16 #51】create：邮箱小写化、邮箱／电话唯一。主负责人：Henry。审核人：Yuhan。</li>
- *   <li>【US03 #4】updateProfile、changePassword、requirePasswordPolicy。主负责人：Henry。审核人：Yuhan。</li>
+ *   <li>【US16 #51】create：邮箱小写化、邮箱／电话唯一。主负责人：Henry。</li>
+ *   <li>【US03 #4】updateProfile、changePassword、requirePasswordPolicy。主负责人：Henry。</li>
+ *   <li>【US14 #49 逐项检查】checkNewIdKey、checkNewUsername、checkPassword、checkEmail、checkPhone、
+ *       checkCurrentPassword：表单每输入一项就检查。主负责人：Henry。</li>
  *   <li>【US12 #13】requireAdmin 改为 public，供 Stella 的 StatisticsService 复用。
- *       改动人：Henry（同一 PR 顺带修改）。审核人：Yuhan（Sprint 1 原作者）、Stella（调用者）。</li>
+ *       改动人：Henry（同一 PR 顺带修改）。</li>
  * </ul>
  */
 public final class AccountService {
@@ -24,6 +30,7 @@ public final class AccountService {
     private String currentId;
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Creates the registration service.
      * @param users repository for lookup and persistence
      * @param hasher password hashing implementation
@@ -34,6 +41,7 @@ public final class AccountService {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Registers a MEMBER after validating the profile and checking uniqueness.
      * Passwords are not trimmed. Email format, username uniqueness and password
      * length limits are implementation policies.
@@ -52,9 +60,10 @@ public final class AccountService {
     }
 
     /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
      * Validates and saves a profile with a supplied role.
      *
-     * <p>【Sprint 2 · US16 #51】主负责人：Henry。审核人：Yuhan。
+     * <p>【Sprint 2 · US16 #51】主负责人：Henry。
      * 做什么：顺序为 校验资料 → 邮箱／电话格式 → 密码规则 → ID／用户名查重 → 邮箱／电话查重 → 哈希 → 保存。
      * 对接／验证：注册、首次管理员和管理员添加用户都经过这里，因此管理员创建的账户也受同样的唯一性检查。
      */
@@ -79,7 +88,8 @@ public final class AccountService {
     }
 
     /**
-     * 【Sprint 2 · US03 #4】主负责人：Henry。审核人：Yuhan。
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     * 【Sprint 2 · US03 #4】主负责人：Henry。
      * 做什么：统一密码长度规则（8–128，不能全是空白）；注册和修改密码共用。
      * 对接／验证：错误消息以字段名开头，例如 “New password must contain 8-128 characters”。
      *
@@ -94,7 +104,8 @@ public final class AccountService {
     }
 
     /**
-     * 【Sprint 2 · US03 #4】主负责人：Henry。审核人：Yuhan。
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     * 【Sprint 2 · US03 #4】主负责人：Henry。
      * 做什么：已登录用户修改自己的姓名、邮箱、电话。ID key、用户名、角色和密码哈希保持不变。
      * 对接／验证：邮箱／电话经过 ContactValidator，不能与其他用户重复（自己的旧值可以保留）；
      * 保存后重启仍有效（ProfileServiceTest 验证）。界面由 Henry 的 AccountScreens.profile 调用。
@@ -119,7 +130,8 @@ public final class AccountService {
     }
 
     /**
-     * 【Sprint 2 · US03 #4】主负责人：Henry。审核人：Yuhan（密码哈希 Sprint 1 负责人）。
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     * 【Sprint 2 · US03 #4】主负责人：Henry。
      * 做什么：先验证当前密码，再检查新密码规则，最后保存新哈希；原始新密码不会被保存。
      * 对接／验证：调用 Yuhan 的 PasswordHasher.verify/hash；修改后旧密码登录失败、新密码登录成功。
      *
@@ -139,6 +151,107 @@ public final class AccountService {
     }
 
     /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     * 【Sprint 2 · US14 #49 逐项检查】主负责人：Henry。
+     * 做什么：表单输入 ID key 后立即检查：格式正确且没有被使用。
+     * 对接／验证：AccountScreens 用 ConsoleIO.askValid 调用；create 仍做最终检查。
+     *
+     * @param id raw ID key
+     * @return normalized ID key
+     * @throws IllegalArgumentException if the ID key is invalid or already used
+     */
+    public String checkNewIdKey(String id) {
+        String value = Validation.text(id, "ID key");
+        if (users.existsByIdKey(value)) {
+            throw new IllegalArgumentException("ID key '" + value + "' is already taken");
+        }
+        return value;
+    }
+
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     * 【Sprint 2 · US14 #49 逐项检查】主负责人：Henry。
+     * 做什么：输入用户名后立即检查格式和是否被使用。
+     *
+     * @param username raw username
+     * @return normalized username
+     * @throws IllegalArgumentException if the username is invalid or already used
+     */
+    public String checkNewUsername(String username) {
+        String value = Validation.text(username, "Username");
+        if (users.existsByUsername(value)) {
+            throw new IllegalArgumentException("Username '" + value + "' is already taken");
+        }
+        return value;
+    }
+
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     * 【Sprint 2 · US14 #49 逐项检查】主负责人：Henry。
+     * 做什么：输入密码后立即检查长度规则（8–128，不能全是空白）；密码不去空格。
+     *
+     * @param password raw password
+     * @return the unchanged password
+     * @throws IllegalArgumentException if the password breaks the policy
+     */
+    public static String checkPassword(String password) {
+        requirePasswordPolicy(password, "Password");
+        return password;
+    }
+
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     * 【Sprint 2 · US14 #49 / US16 #51 逐项检查】主负责人：Henry。
+     * 做什么：输入邮箱后立即检查格式并确认没有被其他账户使用。
+     * 对接／验证：新账户传 ownerId = null；修改资料传自己的 ID，自己的旧邮箱不算重复。
+     *
+     * @param email raw email
+     * @param ownerId ID key allowed to keep this email, or {@code null}
+     * @return normalized lowercase email
+     * @throws IllegalArgumentException if the email is invalid or used by another account
+     */
+    public String checkEmail(String email, String ownerId) {
+        String value = ContactValidator.email(email);
+        ContactValidator.requireUniqueEmail(users, value, ownerId);
+        return value;
+    }
+
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     * 【Sprint 2 · US14 #49 / US16 #51 逐项检查】主负责人：Henry。
+     * 做什么：输入电话后立即检查格式并确认没有被其他账户使用。
+     *
+     * @param phone raw phone
+     * @param ownerId ID key allowed to keep this phone, or {@code null}
+     * @return normalized phone
+     * @throws IllegalArgumentException if the phone is invalid or used by another account
+     */
+    public String checkPhone(String phone, String ownerId) {
+        String value = ContactValidator.phone(phone);
+        ContactValidator.requireUniquePhone(users, value, ownerId);
+        return value;
+    }
+
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     * 【Sprint 2 · US03 #4 / US14 #49 逐项检查】主负责人：Henry。
+     * 做什么：修改密码时，输入当前密码后立即验证，错误就重问，不必先输入新密码。
+     * 对接／验证：只用于已登录用户修改自己的密码；登录流程不使用。
+     *
+     * @param password password typed as the current password
+     * @return the unchanged password
+     * @throws IllegalStateException if nobody is logged in
+     * @throws IllegalArgumentException if the password is wrong
+     */
+    public String checkCurrentPassword(String password) {
+        if (!hasher.verify(password, requireUser().getPasswordHash())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+        return password;
+    }
+
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Checks whether the system requires initial administrator setup.
      *
      * @return true if no user accounts exist; false otherwise
@@ -148,6 +261,7 @@ public final class AccountService {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Creates the initial administrator account when the user repository is empty.
      *
      * @param id the unique user ID
@@ -169,6 +283,7 @@ public final class AccountService {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Authenticates a user using their ID key and password.
      *
      * <p>Any existing session is cleared before authentication.
@@ -192,6 +307,7 @@ public final class AccountService {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Logs out the current user by clearing the active session.
      */
     public void logout() {
@@ -199,6 +315,7 @@ public final class AccountService {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Retrieves the currently authenticated user from the repository.
      *
      * @return an Optional containing the current user, or an empty Optional
@@ -209,6 +326,7 @@ public final class AccountService {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Ensures that a user is currently authenticated.
      *
      * @return the authenticated user
@@ -219,6 +337,7 @@ public final class AccountService {
     }
 
     /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
      * Ensures that the current user has administrator privileges.
      *
      * @return the authenticated administrator
@@ -226,7 +345,7 @@ public final class AccountService {
      *         user does not have administrator privileges
      *
      * <p>【Sprint 2 · US12 #13】Henry 在 US03/US16 的 PR 中把它改为 public（只改可见性，逻辑不变）。
-     * 审核人：Yuhan。对接：Stella 的 StatisticsService 调用它检查管理员权限。
+     * 对接：Stella 的 StatisticsService 调用它检查管理员权限。
      */
     public User requireAdmin() {
         User user = requireUser();
@@ -239,6 +358,7 @@ public final class AccountService {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Retrieves all registered user accounts.
      *
      * @return a list of all registered users
@@ -250,6 +370,7 @@ public final class AccountService {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Creates a new user account with the specified role.
      *
      * <p>Only administrators can create accounts through this method.
@@ -273,6 +394,7 @@ public final class AccountService {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Deletes a user account by its unique ID.
      *
      * <p>Administrators cannot delete their own accounts.

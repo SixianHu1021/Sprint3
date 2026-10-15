@@ -8,6 +8,9 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
+ *
  * Implements password hashing and verification using PBKDF2 with HMAC-SHA256.
  *
  * <p>Each password is hashed with a randomly generated salt. The resulting
@@ -21,6 +24,7 @@ public final class Pbkdf2PasswordHasher implements PasswordHasher {
     private final SecureRandom random = new SecureRandom();
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Generates a salted PBKDF2 hash for the given password.
      *
      * @param password the plaintext password
@@ -43,6 +47,7 @@ public final class Pbkdf2PasswordHasher implements PasswordHasher {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Verifies a password against a previously generated PBKDF2 hash.
      *
      * @param password the plaintext password to verify
@@ -79,6 +84,7 @@ public final class Pbkdf2PasswordHasher implements PasswordHasher {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Derives a 256-bit key using PBKDF2 with HMAC-SHA256.
      *
      * @param password the plaintext password

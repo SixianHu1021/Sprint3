@@ -16,6 +16,9 @@ import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+ *
  * Verifies scroll storage independently of login, upload and console services.
  * Adapted from the scroll persistence scenarios in SprintOneTest.
  */
@@ -26,14 +29,20 @@ class FileScrollRepositoryTest {
     private Path snapshot;
     private FileScrollRepository scrolls;
 
-    /** Creates a separate temporary repository for each test. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * Creates a separate temporary repository for each test.
+     */
     @BeforeEach
     void setup() {
         snapshot = directory.resolve("scrolls.properties");
         scrolls = new FileScrollRepository(snapshot);
     }
 
-    /** Supplies a scroll whose content covers every byte value, including zero and negative bytes. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * Supplies a scroll whose content covers every byte value, including zero and negative bytes.
+     */
     private DigitalScroll binary() {
         byte[] content = new byte[256];
         for (int i = 0; i < content.length; i++) {
@@ -42,7 +51,10 @@ class FileScrollRepositoryTest {
         return new DigitalScroll("s1", "Binary", content, "u1", DATE);
     }
 
-    /** An absent snapshot starts an empty repository and lookups report absence. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * An absent snapshot starts an empty repository and lookups report absence.
+     */
     @Test
     void missingSnapshotStartsEmpty() {
         assertTrue(scrolls.findAll().isEmpty());
@@ -51,7 +63,10 @@ class FileScrollRepositoryTest {
         assertFalse(scrolls.existsByName("missing"));
     }
 
-    /** Bytes, metadata and counters survive reopening; returned lists cannot be modified. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * Bytes, metadata and counters survive reopening; returned lists cannot be modified.
+     */
     @Test
     void savedScrollSurvivesRestart() {
         scrolls.save(binary());
@@ -73,14 +88,20 @@ class FileScrollRepositoryTest {
         assertThrows(UnsupportedOperationException.class, () -> reopened.findAll().clear());
     }
 
-    /** Empty content is stored and restored as zero bytes. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * Empty content is stored and restored as zero bytes.
+     */
     @Test
     void emptyContentSurvivesRestart() {
         scrolls.save(new DigitalScroll("empty", "Empty", new byte[0], "u1", DATE));
         assertEquals(0, new FileScrollRepository(snapshot).findById("empty").orElseThrow().getContent().length);
     }
 
-    /** Content is copied in and out, so callers cannot change a stored scroll. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * Content is copied in and out, so callers cannot change a stored scroll.
+     */
     @Test
     void contentIsCopiedDefensively() {
         byte[] content = {1, 2, 3};
@@ -90,7 +111,10 @@ class FileScrollRepositoryTest {
         assertArrayEquals(new byte[]{1, 2, 3}, scroll.getContent());
     }
 
-    /** Saving the same ID replaces it; a name used by another scroll is rejected. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * Saving the same ID replaces it; a name used by another scroll is rejected.
+     */
     @Test
     void upsertsAndRejectsDuplicateNames() {
         scrolls.save(binary());
@@ -104,7 +128,10 @@ class FileScrollRepositoryTest {
         assertEquals(2, reopened.findById("s1").orElseThrow().getDownloadCount());
     }
 
-    /** A file in place of the parent directory prevents saving without adding a scroll. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * A file in place of the parent directory prevents saving without adding a scroll.
+     */
     @Test
     void failedSaveLeavesMemoryUnchanged() throws IOException {
         Path blocker = directory.resolve("blocker");
@@ -114,7 +141,10 @@ class FileScrollRepositoryTest {
         assertTrue(blocked.findAll().isEmpty());
     }
 
-    /** Snapshots written before counters existed load with 1 upload and 0 downloads. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * Snapshots written before counters existed load with 1 upload and 0 downloads.
+     */
     @Test
     void missingCountersUseDefaults() throws IOException {
         scrolls.save(binary());
@@ -127,7 +157,10 @@ class FileScrollRepositoryTest {
         assertEquals(0, legacy.getDownloadCount());
     }
 
-    /** Invalid counts, counters, fields and Base64 content fail explicitly. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * Invalid counts, counters, fields and Base64 content fail explicitly.
+     */
     @Test
     void corruptedSnapshotsAreRejected() throws IOException {
         Path bad = directory.resolve("bad.properties");
@@ -146,7 +179,10 @@ class FileScrollRepositoryTest {
         assertThrows(IllegalStateException.class, () -> new FileScrollRepository(directory));
     }
 
-    /** Duplicate IDs or names in stored records are rejected at startup. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * Duplicate IDs or names in stored records are rejected at startup.
+     */
     @Test
     void duplicateSnapshotRecordsAreRejected() throws IOException {
         scrolls.save(binary());
@@ -160,7 +196,10 @@ class FileScrollRepositoryTest {
         assertThrows(IllegalStateException.class, () -> new FileScrollRepository(bad));
     }
 
-    /** Missing required fields and invalid counters are rejected by the model. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * Missing required fields and invalid counters are rejected by the model.
+     */
     @Test
     void invalidScrollsAreRejected() {
         assertThrows(IllegalArgumentException.class, () -> new DigitalScroll("", "n", new byte[0], "u", DATE));
@@ -171,7 +210,10 @@ class FileScrollRepositoryTest {
         assertThrows(IllegalArgumentException.class, () -> new DigitalScroll("s", "n", new byte[0], "u", DATE, 1, -1));
     }
 
-    /** Reads a snapshot so a test can alter individual properties. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * Reads a snapshot so a test can alter individual properties.
+     */
     private static Properties load(Path file) throws IOException {
         Properties data = new Properties();
         try (Reader reader = Files.newBufferedReader(file)) {
@@ -180,7 +222,10 @@ class FileScrollRepositoryTest {
         return data;
     }
 
-    /** Writes altered properties back to a snapshot file. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Stella（需要修改时先联系原作者）
+     * Writes altered properties back to a snapshot file.
+     */
     private static void store(Path file, Properties data) throws IOException {
         try (Writer writer = Files.newBufferedWriter(file)) {
             data.store(writer, "test snapshot");

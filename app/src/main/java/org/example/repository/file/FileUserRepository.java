@@ -11,6 +11,10 @@ import org.example.model.UserRole;
 import org.example.repository.UserRepository;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+ *   - Sprint 1 原作者：Henry（未标 PR 的方法本轮不改）
+ *
  * Persists user profiles and supplied password hashes in a properties snapshot.
  * Updates memory only after saving succeeds. Hash generation and authorization
  * belong to the service layer. Intended for a single process without concurrent writers.
@@ -20,6 +24,7 @@ public final class FileUserRepository implements UserRepository {
     private List<User> users = new ArrayList<>();
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Loads users from a snapshot; an absent file starts an empty repository.
      * @param file user snapshot path
      * @throws IllegalStateException if reading fails or user records are invalid
@@ -49,6 +54,7 @@ public final class FileUserRepository implements UserRepository {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Inserts a user or replaces the user with the same ID key, saving before updating memory.
      * @param user profile containing an already generated password hash
      * @throws IllegalArgumentException if another user has the same username
@@ -68,6 +74,7 @@ public final class FileUserRepository implements UserRepository {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Serializes every profile field and supplied password hash into a complete snapshot.
      * The caller updates memory only after this method succeeds.
      * @param snapshot users to persist
@@ -91,6 +98,7 @@ public final class FileUserRepository implements UserRepository {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Finds a user by exact, case-sensitive username.
      * @param username username to look up
      * @return matching user, or an empty optional
@@ -101,6 +109,7 @@ public final class FileUserRepository implements UserRepository {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Finds a user by exact, case-sensitive custom ID key.
      * @param idKey ID key to look up
      * @return matching user, or an empty optional
@@ -111,6 +120,7 @@ public final class FileUserRepository implements UserRepository {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Returns an unmodifiable copy of the user list without checking administrator privileges.
      * @return snapshot of all users
      */
@@ -120,6 +130,7 @@ public final class FileUserRepository implements UserRepository {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Checks whether an exact username exists.
      * @param username username to check
      * @return true if present
@@ -130,6 +141,7 @@ public final class FileUserRepository implements UserRepository {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Checks whether an exact ID key exists.
      * @param idKey ID key to check
      * @return true if present
@@ -140,6 +152,7 @@ public final class FileUserRepository implements UserRepository {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Removes the specified user and saves before updating memory.
      * An absent ID causes the unchanged list to be saved.
      * @param idKey ID key to remove
@@ -154,7 +167,8 @@ public final class FileUserRepository implements UserRepository {
     }
 
     /**
-     * 【Sprint 2 · US16 #51】主负责人：Henry。审核人：Yuhan。
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     * 【Sprint 2 · US16 #51】主负责人：Henry。
      * 做什么：按邮箱查找，忽略大小写和首尾空格。
      * 对接／验证：旧数据里大小写不同的邮箱也能被识别为重复。
      *
@@ -173,7 +187,8 @@ public final class FileUserRepository implements UserRepository {
     }
 
     /**
-     * 【Sprint 2 · US16 #51】主负责人：Henry。审核人：Yuhan。
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     * 【Sprint 2 · US16 #51】主负责人：Henry。
      * 做什么：按电话查找，比较前去掉空格、横线、括号和点。
      * 对接／验证：保存的电话仍保留用户输入的格式，只有比较时使用规范化结果。
      *
@@ -192,6 +207,7 @@ public final class FileUserRepository implements UserRepository {
     }
 
     /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
      * 【Sprint 2 · US16 #51】主负责人：Henry。
      * 做什么：生成电话比较键。
      * 对接／验证：只在本类使用。

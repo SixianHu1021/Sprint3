@@ -4,7 +4,10 @@ import java.util.List;
 import org.example.model.DigitalScroll;
 
 /**
- * 【Sprint 2 · US12 #13】主负责人：Stella。审核人：Yuhan（管理员权限负责人）。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Yuhan
+ *
+ * 【Sprint 2 · US12 #13】主负责人：Stella。
  * 做什么：管理员查看每个卷轴的上传次数、下载次数，以及全站合计。非管理员调用会被拒绝。
  * 对接／验证：权限调用 AccountService.requireAdmin（Henry 在 R1 改为 public）；数据来自 ScrollService.browse，
  * 不直接读文件。界面在 Stella 的 StatisticsScreen。
@@ -12,6 +15,7 @@ import org.example.model.DigitalScroll;
 public final class StatisticsService {
 
     /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Yuhan
      * 主负责人：Stella。
      * 做什么：一行统计数据。
      *
@@ -26,6 +30,7 @@ public final class StatisticsService {
     }
 
     /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Yuhan
      * 主负责人：Stella。
      * 做什么：完整报告：每个卷轴一行，加上上传和下载合计。
      *
@@ -40,6 +45,7 @@ public final class StatisticsService {
     private final AccountService accounts;
 
     /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Yuhan
      * 主负责人：Stella。
      * 做什么：保存卷轴服务和账户服务引用。
      * 对接／验证：ConsoleUi 使用同一组服务创建本类。
@@ -53,6 +59,7 @@ public final class StatisticsService {
     }
 
     /**
+     * 【PR s2-r2-scroll-edit-stats】实现：Stella ｜ 审核：Yuhan
      * 主负责人：Stella。
      * 做什么：先检查管理员，再生成每个卷轴的统计和合计。
      * 对接／验证：浏览和预览不改变数字；下载、替换文件后数字变化（StatisticsServiceTest 验证）。

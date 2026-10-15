@@ -11,6 +11,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.Properties;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+ *
  * Reads and writes UTF-8 properties snapshots for user and scroll repositories.
  * Intended for a single application process without concurrent writers.
  */
@@ -18,6 +21,7 @@ public final class AtomicPropertiesStore {
     private final Path file;
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Creates a store with an absolute snapshot path.
      * @param file snapshot file path
      */
@@ -26,6 +30,7 @@ public final class AtomicPropertiesStore {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Loads properties, returning an empty snapshot if the file does not exist.
      * @return loaded properties
      * @throws IllegalStateException if reading fails or properties syntax is invalid
@@ -44,6 +49,7 @@ public final class AtomicPropertiesStore {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Writes a temporary snapshot and replaces the destination after closing the writer.
      * Creates missing parent directories and attempts an atomic move. If unsupported,
      * falls back to regular replacement without the same atomicity guarantee.

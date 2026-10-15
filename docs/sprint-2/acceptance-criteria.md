@@ -95,7 +95,9 @@ The PO marks a story Done only after every criterion below is demonstrated and t
 | Unknown format shows “unknown” | `DigitalScroll.UNKNOWN_FORMAT` | `unknownAndEmptyPreviews`, `oldSnapshotsWithoutFormatLoadAsUnknown` |
 | Download saved with correct extension | `ScrollService.withExtension` | `downloadAddsMissingExtensionAndKeepsFormat`, `jpegAliasesAndUnknownFormatsKeepTheChosenName` |
 | Available to guests and members | preview needs no login | `guestSeesLoginRequiredAndCannotDownload` |
-| (Tutor feedback) preview content by type | `ScrollPreviewRenderer` | text / image / pdf / zip / hex tests in `ScrollFormatTest` |
+| (Tutor feedback) preview content by type | `ScrollPreviewRenderer` | text / image / pdf / zip / hex tests in `ScrollFormatTest`; unknown text types in `ScrollViewerTest` |
+| (Client, 16 Oct) logged-in users open PDFs, images, text and docx in the default app; guests keep the info preview | `ScrollViewer`, `FileOpener`, `FileFormat.isOpenable`, `BrowseScreen.openInApp` | `ScrollViewerTest` (10 tests, fake opener) |
+| (Client, 16 Oct) opening does not count as a download | `ScrollViewer.open` never saves the scroll | `openingDoesNotCountAsDownload` |
 
 ## US18 — Sixian — Sort by download count (#53)
 

@@ -7,7 +7,10 @@ import java.util.Locale;
 import org.example.model.DigitalScroll;
 
 /**
- * 【Sprint 2 · US06 #7】主负责人：Sixian。审核人：Stella。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
+ *
+ * 【Sprint 2 · US06 #7】主负责人：Sixian。
  * 做什么：保存当前的筛选条件（上传者 ID、卷轴 ID、名称、上传日期），每个条件都可以单独设置或清除。
  * 文字条件不区分大小写、按“包含”匹配；日期按 yyyy-MM-dd 当天匹配；多个条件同时生效（AND）。
  * 对接／验证：ScrollQueryService.search 使用；BrowseScreen 显示 describe() 的结果。不可变对象，修改时返回新对象。
@@ -31,6 +34,7 @@ public record ScrollFilter(String uploaderId, String scrollId, String name, Loca
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：没有任何条件的筛选；“清除筛选”回到完整列表。
      * 对接／验证：BrowseScreen 初始值和 Clear filters 使用。
@@ -42,6 +46,7 @@ public record ScrollFilter(String uploaderId, String scrollId, String name, Loca
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：替换上传者条件。
      *
@@ -53,6 +58,7 @@ public record ScrollFilter(String uploaderId, String scrollId, String name, Loca
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：替换卷轴 ID 条件。
      *
@@ -64,6 +70,7 @@ public record ScrollFilter(String uploaderId, String scrollId, String name, Loca
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：替换名称条件。
      *
@@ -75,6 +82,7 @@ public record ScrollFilter(String uploaderId, String scrollId, String name, Loca
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：替换上传日期条件。
      *
@@ -86,6 +94,7 @@ public record ScrollFilter(String uploaderId, String scrollId, String name, Loca
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：判断是否没有任何条件。
      *
@@ -96,6 +105,7 @@ public record ScrollFilter(String uploaderId, String scrollId, String name, Loca
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：判断一个卷轴是否满足所有已设置的条件。
      * 对接／验证：ScrollQueryServiceTest 分别测试每个条件、组合条件和大小写。
@@ -111,6 +121,7 @@ public record ScrollFilter(String uploaderId, String scrollId, String name, Loca
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：生成列表标题中的条件说明，例如 “uploader ID contains 'm', upload date = 2026-10-20”。
      * 对接／验证：没有条件时返回 “none”。
@@ -135,6 +146,7 @@ public record ScrollFilter(String uploaderId, String scrollId, String name, Loca
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：不区分大小写的“包含”比较；条件为 null 时总是匹配。
      */
@@ -144,6 +156,7 @@ public record ScrollFilter(String uploaderId, String scrollId, String name, Loca
     }
 
     /**
+     * 【PR s2-r1-query-format】实现：Sixian ｜ 审核：Stella
      * 主负责人：Sixian。
      * 做什么：去掉首尾空格，空白视为 null。
      */

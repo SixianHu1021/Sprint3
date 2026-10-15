@@ -25,7 +25,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 【Sprint 2 · US10 #11】主负责人：Stella。审核人：Sixian。
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r3-my-scrolls-stats-screens】实现：Stella ｜ 审核：Sixian
+ *
+ * 【Sprint 2 · US10 #11】主负责人：Stella。
  * 测什么：“我的卷轴”页面：列表只含自己的卷轴、编号改名、替换文件、删除需要确认（n 取消、y 删除）、
  * 别名带参数、删除别人的卷轴报错、没有卷轴时的空状态。
  */
@@ -51,6 +54,9 @@ class MyScrollsConsoleTest {
     private ScrollEditService edits;
     private StringWriter out;
 
+    /**
+     * 【PR s2-r3-my-scrolls-stats-screens】实现：Stella ｜ 审核：Sixian
+     */
     @BeforeEach
     void setUp() throws IOException {
         accounts = new AccountService(new FileUserRepository(directory.resolve("users.properties")), HASHER);
@@ -66,13 +72,19 @@ class MyScrollsConsoleTest {
         out = new StringWriter();
     }
 
-    /** Runs the screen with scripted input. */
+    /**
+     * 【PR s2-r3-my-scrolls-stats-screens】实现：Stella ｜ 审核：Sixian
+     * Runs the screen with scripted input.
+     */
     private String run(String... lines) {
         new MyScrollsScreen(edits,
                 new ConsoleIO(new Scanner(String.join("\n", lines) + "\n"), new PrintWriter(out, true))).show();
         return out.toString();
     }
 
+    /**
+     * 【PR s2-r3-my-scrolls-stats-screens】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void listsOnlyOwnScrollsWithNumberedActions() {
         String text = run("0");
@@ -84,6 +96,9 @@ class MyScrollsConsoleTest {
         assertTrue(text.contains("  3. Delete a scroll"));
     }
 
+    /**
+     * 【PR s2-r3-my-scrolls-stats-screens】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void renameAndReplaceThroughNumbers() throws IOException {
         Path png = Files.write(directory.resolve("picture.png"), new byte[]{(byte) 0x89, 'P', 'N', 'G'});
@@ -93,6 +108,9 @@ class MyScrollsConsoleTest {
         assertTrue(text.contains("s1 | Better Name | png | uploads: 2 | downloads: 0"));
     }
 
+    /**
+     * 【PR s2-r3-my-scrolls-stats-screens】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void deleteAsksForConfirmation() {
         String text = run("3", "s1", "n", "delete s1", "y", "0");
@@ -102,15 +120,23 @@ class MyScrollsConsoleTest {
         assertFalse(repository.existsById("s1"));
     }
 
+    /**
+     * 【PR s2-r3-my-scrolls-stats-screens】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void otherUsersScrollsCannotBeChanged() {
-        String text = run("3", "s2", "1", "s2", "Hijack", "0");
+        String text = run("3", "s2", "1", "s2", "cancel", "0");
         assertTrue(text.contains("Error: You can only delete scrolls you uploaded"));
         assertTrue(text.contains("Error: You can only edit scrolls you uploaded"));
+        assertTrue(text.contains("Cancelled."));
+        assertFalse(text.contains("New name: "));
         assertTrue(repository.existsById("s2"));
         assertEquals("Admin Scroll", repository.findById("s2").orElseThrow().getName());
     }
 
+    /**
+     * 【PR s2-r3-my-scrolls-stats-screens】实现：Stella ｜ 审核：Sixian
+     */
     @Test
     void guestsCannotOpenMyScrolls() {
         accounts.logout();

@@ -12,29 +12,37 @@ import org.example.repository.file.FileScrollRepository;
 import org.example.repository.file.FileUserRepository;
 import org.example.security.Pbkdf2PasswordHasher;
 import org.example.service.AccountService;
+import org.example.service.FileOpener;
 import org.example.service.ScrollEditService;
 import org.example.service.ScrollService;
 import org.example.ui.ConsoleIO;
 import org.example.ui.ConsoleUi;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
+ *   - 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+ *   - Sprint 1 原作者：Yuhan（未标 PR 的方法本轮不改）
+ *
  * Entry point for the Virtual Scroll Access System (VSAS).
  *
  * <p>Initializes persistent repositories, application services,
  * and the console user interface.
  *
- * <p>【Sprint 2】主负责人：Yuhan（R4 集成）。审核人：Henry。
+ * <p>【Sprint 2】主负责人：Yuhan（R4 集成）。
  * 变更：创建 Stella 的 ScrollEditService；用 ConsoleIO.system 让真实终端隐藏密码输入（US15 #50）。
  */
 public final class App {
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Yuhan（需要修改时先联系原作者）
      * Prevents instantiation of this utility class.
      */
     private App() {
     }
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry；【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
      * Starts the VSAS application.
      *
      * <p>Application data is stored in the default {@code data}
@@ -65,7 +73,9 @@ public final class App {
 
             ScrollEditService edits = new ScrollEditService(scrollRepository, accounts);
 
-            ConsoleUi ui = new ConsoleUi(accounts, scrolls, edits, ConsoleIO.system(input, output));
+            // US17：真实程序用电脑默认应用打开预览（PDF、图片等）。
+            ConsoleUi ui = new ConsoleUi(accounts, scrolls, edits, ConsoleIO.system(input, output),
+                    FileOpener.desktop());
             ui.run();
 
         } catch (IllegalStateException e) {

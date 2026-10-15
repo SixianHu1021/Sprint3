@@ -14,14 +14,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Verifies registration with the production password hasher and isolated file storage. */
+/**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+ *   - Sprint 1 原作者：Henry（未标 PR 的方法本轮不改）
+ *
+ * Verifies registration with the production password hasher and isolated file storage.
+ */
 class RegistrationTest {
     @TempDir Path directory;
     private FileUserRepository users;
     private AccountService accounts;
     private Pbkdf2PasswordHasher hasher;
 
-    /** Creates independent dependencies for each scenario. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Creates independent dependencies for each scenario.
+     */
     @BeforeEach
     void setup() {
         users = new FileUserRepository(directory.resolve("users.properties"));
@@ -29,12 +38,18 @@ class RegistrationTest {
         accounts = new AccountService(users, hasher);
     }
 
-    /** Creates a valid profile for persistence and duplicate scenarios. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Creates a valid profile for persistence and duplicate scenarios.
+     */
     private User member() {
         return accounts.register("m", "member", "Password123", "Member", "member@example.com", "456");
     }
 
-    /** All profile fields and the verifiable password hash survive reopening. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * All profile fields and the verifiable password hash survive reopening.
+     */
     @Test
     void registrationPersistsEveryField() throws IOException {
         User created = member();
@@ -50,7 +65,10 @@ class RegistrationTest {
         assertFalse(Files.readString(directory.resolve("users.properties")).contains("Password123"));
     }
 
-    /** Duplicate IDs and usernames are rejected without replacing the original profile. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Duplicate IDs and usernames are rejected without replacing the original profile.
+     */
     @Test
     void duplicateIdentifiersAreRejected() {
         User original = member();
@@ -64,7 +82,10 @@ class RegistrationTest {
         assertEquals(1, new FileUserRepository(directory.resolve("users.properties")).findAll().size());
     }
 
-    /** Required profile fields reject missing, blank, oversized and control-character input. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Required profile fields reject missing, blank, oversized and control-character input.
+     */
     @Test
     void invalidFieldsDoNotCreateAccounts() {
         String[] valid = {"m", "member", "Password123", "Member", "member@example.com", "456"};
@@ -84,7 +105,10 @@ class RegistrationTest {
         assertFalse(Files.exists(directory.resolve("users.properties")));
     }
 
-    /** Invalid passwords do not leave partially created accounts. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Invalid passwords do not leave partially created accounts.
+     */
     @Test
     void invalidPasswordsAreRejected() {
         for (String password : new String[]{null, "", "short", " ".repeat(8), "x".repeat(129)}) {
@@ -94,7 +118,10 @@ class RegistrationTest {
         assertTrue(users.findAll().isEmpty());
     }
 
-    /** Profile whitespace is normalized while password whitespace is preserved. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Profile whitespace is normalized while password whitespace is preserved.
+     */
     @Test
     void normalizesProfilesWithoutTrimmingPasswords() {
         String password = " Password123 ";
@@ -108,7 +135,10 @@ class RegistrationTest {
         assertFalse(hasher.verify(password.strip(), user.getPasswordHash()));
     }
 
-    /** Valid boundary lengths produce member accounts and verifiable hashes. */
+    /**
+     * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+     * Valid boundary lengths produce member accounts and verifiable hashes.
+     */
     @Test
     void passwordBoundariesAreAccepted() {
         for (int length : new int[]{8, 128}) {
@@ -121,7 +151,10 @@ class RegistrationTest {
         }
     }
 
-    /** Persistence errors are propagated and leave the repository empty. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Persistence errors are propagated and leave the repository empty.
+     */
     @Test
     void failedPersistenceDoesNotCreateAccount() throws IOException {
         Path blocker = directory.resolve("blocker");
@@ -133,7 +166,10 @@ class RegistrationTest {
         assertTrue(blocked.findAll().isEmpty());
     }
 
-    /** Shared validation strips whitespace and accepts the 200-character boundary. */
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
+     * Shared validation strips whitespace and accepts the 200-character boundary.
+     */
     @Test
     void requiredTextValidation() {
         assertEquals("hello", Validation.text(" hello ", "Field"));

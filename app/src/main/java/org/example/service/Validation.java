@@ -1,9 +1,13 @@
 package org.example.service;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
+ *   - Sprint 1 原作者：Henry（未标 PR 的方法本轮不改）
+ *
  * Validates required profile and scroll text. Passwords require separate validation.
  *
- * <p>【Sprint 2 · US14 #49】主负责人：Yuhan（本轮修改错误消息）。审核人：Henry（Sprint 1 原作者）。
+ * <p>【Sprint 2 · US14 #49】主负责人：Yuhan（本轮修改错误消息）。
  * 做什么：把一条笼统的错误拆成三种具体说明：为空、过长、含控制字符，让用户知道哪里错了。
  * 对接／验证：校验规则本身（1–200 字符、去首尾空格）与 Sprint 1 完全相同；RegistrationTest 仍然通过，
  * 新增的 InputFeedbackTest 检查每种消息文字。
@@ -13,12 +17,14 @@ public final class Validation {
     public static final int MAX_LENGTH = 200;
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Henry（需要修改时先联系原作者）
      * Prevents utility class instantiation.
      */
     private Validation() {
     }
 
     /**
+     * 【PR s2-r1-console-io】实现：Yuhan ｜ 审核：Henry
      * Rejects null, blank, overlong or control-character input, then strips whitespace.
      *
      * <p>主负责人：Yuhan（Sprint 2 消息）／Henry（Sprint 1 规则）。

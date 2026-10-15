@@ -19,6 +19,9 @@ import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+ *
  * Tests authenticated scroll downloads, file content,
  * download counters and error handling.
  */
@@ -47,6 +50,9 @@ class ScrollDownloadTest {
     private AccountService accounts;
     private ScrollService scrolls;
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @BeforeEach
     void setUp() {
         snapshot = directory.resolve("scrolls.properties");
@@ -65,10 +71,16 @@ class ScrollDownloadTest {
                 "Member", "member@example.com", "456");
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     private void login() {
         accounts.login("m", "password123");
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     private void uploadSample(byte[] content) throws IOException {
         Path source = Files.write(
                 directory.resolve("source.bin"), content);
@@ -76,12 +88,18 @@ class ScrollDownloadTest {
         scrolls.upload("s1", "Sample Scroll", source);
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     private DigitalScroll storedScroll() {
         return new FileScrollRepository(snapshot)
                 .findById("s1")
                 .orElseThrow();
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void downloadWritesCorrectBinaryContent() throws IOException {
         byte[] content = {0, 1, -1, 127, -128};
@@ -94,6 +112,9 @@ class ScrollDownloadTest {
         assertArrayEquals(content, Files.readAllBytes(destination));
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void successfulDownloadIncrementsCounter() throws IOException {
         uploadSample(new byte[]{1, 2, 3});
@@ -105,6 +126,9 @@ class ScrollDownloadTest {
         assertEquals(1, storedScroll().getDownloadCount());
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void multipleDownloadsIncrementCounter() throws IOException {
         uploadSample(new byte[]{1, 2, 3});
@@ -115,6 +139,9 @@ class ScrollDownloadTest {
         assertEquals(2, storedScroll().getDownloadCount());
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void guestsCannotDownload() throws IOException {
         uploadSample(new byte[]{1, 2, 3});
@@ -129,6 +156,9 @@ class ScrollDownloadTest {
         assertEquals(0, storedScroll().getDownloadCount());
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void invalidScrollIdsAreRejected() throws IOException {
         uploadSample(new byte[]{1, 2, 3});
@@ -148,6 +178,9 @@ class ScrollDownloadTest {
         assertEquals(0, storedScroll().getDownloadCount());
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void nullDestinationIsRejected() throws IOException {
         uploadSample(new byte[]{1, 2, 3});
@@ -158,6 +191,9 @@ class ScrollDownloadTest {
         assertEquals(0, storedScroll().getDownloadCount());
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void failedWriteDoesNotIncrementCounter() throws IOException {
         uploadSample(new byte[]{1, 2, 3});
@@ -169,6 +205,9 @@ class ScrollDownloadTest {
         assertEquals(0, storedScroll().getDownloadCount());
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void downloadPreservesOriginalMetadata() throws IOException {
         uploadSample(new byte[]{1, 2, 3});
@@ -188,6 +227,9 @@ class ScrollDownloadTest {
         assertEquals(1, after.getDownloadCount());
     }
 
+    /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
+     */
     @Test
     void downloadCanOverwriteExistingFile() throws IOException {
         byte[] content = {10, 20, 30};
@@ -204,6 +246,7 @@ class ScrollDownloadTest {
     }
 
     /**
+     * 【Sprint 1 已完成 · 本轮不改】原作者：Sixian（需要修改时先联系原作者）
      * Download counts persist after restarting the services.
      */
     @Test

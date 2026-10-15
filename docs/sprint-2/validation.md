@@ -1,12 +1,14 @@
 <!-- 主负责人：Henry（Scrum Master，汇总验证结果）；各功能负责人检查自己的测试结果。 -->
 # Local validation record
 
-Run on 2026-10-15 in `sprint2_copy` (reference implementation), Java 21 toolchain. **Not a Jenkins run** and
+Run on 2026-10-15 in `sprint2` (reference implementation), Java 21 toolchain. **Not a Jenkins run** and
 not evidence for the team repository: re-run on the team repository after the R4 merge and record the Jenkins build.
 
 - Command: `./gradlew clean build` (now includes Checkstyle and the new 75% line-coverage gate).
 - Result: BUILD SUCCESSFUL; `checkstyleMain`/`checkstyleTest` passed; `jacocoTestCoverageVerification` passed.
 - JUnit: **190 tests, 0 failures, 0 errors, 0 skipped** (93 from Sprint 1 + 97 new).
+- Update 2026-10-16 (per-field checks, open-in-app previews, ownership labels): **211 tests, 0 failures**
+  (93 Sprint 1, of which 9 assertions updated for new behaviour, + 118 new); line coverage 96.6%, branch 90.1%.
 - JaCoCo, all production classes:
   - Lines: 1011 / 1037 = 97.49%
   - Instructions: 5245 / 5359 = 97.87%

@@ -9,16 +9,22 @@ import org.example.model.DigitalScroll;
 import org.example.model.User;
 import org.example.model.UserRole;
 import org.example.service.AccountService;
+import org.example.service.FileOpener;
 import org.example.service.ScrollEditService;
 import org.example.service.ScrollQueryService;
 import org.example.service.ScrollService;
+import org.example.service.ScrollViewer;
 import org.example.service.StatisticsService;
 
 /**
+ * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
+ *   - 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+ *   - Sprint 1 原作者：Yuhan、Henry、Sixian（未标 PR 的方法本轮不改）
+ *
  * Provides a role-aware console interface.
  *
  * <p>【Sprint 2 · US13 #48 / US14 #49 / US15 #50】主负责人：Yuhan（菜单集成，本文件只由 Yuhan 修改）。
- * 审核人：Henry（R2 主审）、全组（R4 集成验收）。
  * 做什么：显示身份、按角色生成编号主菜单，并把菜单项接到各成员的页面类：
  * Henry 的 AccountScreens（注册／添加用户／我的资料）、Sixian 的 BrowseScreen（浏览／筛选／排序／预览／下载）、
  * Stella 的 MyScrollsScreen（我的卷轴）和 StatisticsScreen（统计）。
@@ -36,6 +42,7 @@ public final class ConsoleUi {
     private final StatisticsScreen statisticsScreen;
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：保留 Sprint 1 的 4 参数构造方法，供已有测试使用；密码按普通行读取，不提供卷轴编辑服务。
      * 对接／验证：ConsoleUiTest、AccountConsoleTest、ScrollConsoleTest 无需改构造方式。
@@ -51,6 +58,7 @@ public final class ConsoleUi {
     }
 
     /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：完整构造方法：创建各成员的页面对象，全部共用同一个 ConsoleIO。
      * 对接／验证：App 传入 ConsoleIO.system（真实终端隐藏密码）和 ScrollEditService；
@@ -62,16 +70,35 @@ public final class ConsoleUi {
      * @param io shared console helper
      */
     public ConsoleUi(AccountService accounts, ScrollService scrolls, ScrollEditService edits, ConsoleIO io) {
+        this(accounts, scrolls, edits, io, FileOpener.unavailable());
+    }
+
+    /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
+     * 【Sprint 2 · US17 #52 打开预览】主负责人：Yuhan（接线）；功能：Sixian。
+     * 做什么：完整构造方法，额外接收 “用默认应用打开” 的方式；App 传入 FileOpener.desktop()，
+     * 其他构造方法默认 unavailable()，因此测试永远不会真的弹出窗口。
+     *
+     * @param accounts account management service
+     * @param scrolls scroll management service
+     * @param edits scroll editing service, or {@code null} if unavailable
+     * @param io shared console helper
+     * @param opener how this machine opens files
+     */
+    public ConsoleUi(AccountService accounts, ScrollService scrolls, ScrollEditService edits, ConsoleIO io,
+                     FileOpener opener) {
         this.accounts = accounts;
         this.scrolls = scrolls;
         this.io = io;
         this.accountScreens = new AccountScreens(accounts, io);
-        this.browseScreen = new BrowseScreen(scrolls, new ScrollQueryService(scrolls), accounts, io);
+        this.browseScreen = new BrowseScreen(scrolls, new ScrollQueryService(scrolls), accounts, io,
+                new ScrollViewer(scrolls, accounts, opener));
         this.myScrollsScreen = edits == null ? null : new MyScrollsScreen(edits, io);
         this.statisticsScreen = new StatisticsScreen(new StatisticsService(scrolls, accounts), io);
     }
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry；【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：先完成首次管理员设置，然后每轮显示身份和对应角色的编号菜单，直到选择 0 或输入结束。
      * 对接／验证：任何无效输入只显示 “Error: …” 并重新显示当前菜单，不退出程序（US13/US14）。
@@ -84,6 +111,8 @@ public final class ConsoleUi {
                 io.info("First run: create the initial administrator (no default password).");
                 try {
                     accountScreens.createAccount("bootstrap");
+                } catch (InputCancelledException e) {
+                    io.info("The initial administrator is required before VSAS can be used.");
                 } catch (IllegalArgumentException | IllegalStateException e) {
                     io.error(e.getMessage());
                 }
@@ -102,6 +131,7 @@ public final class ConsoleUi {
     }
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry；【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：按当前角色生成主菜单。共用选项先加入，所以编号在会员和管理员间一致；
      * 其余命令作为隐藏别名加入，输入后由服务层给出 “Please log in first” 或 “Administrator access required”。
@@ -138,6 +168,7 @@ public final class ConsoleUi {
     }
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry；【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：把命令词加入为隐藏别名，指向与可见选项相同的动作。
      * 对接／验证：保证 Sprint 1 的脚本和权限测试（例如会员输入 users）结果不变。
@@ -163,6 +194,7 @@ public final class ConsoleUi {
     }
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：显示当前姓名、用户名和角色，未登录时显示访客（Sprint 1 原有）。
      */
@@ -177,6 +209,7 @@ public final class ConsoleUi {
     }
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：ID key 必填立即检查；密码通过 ConsoleIO 隐藏输入（US15）。
      * 对接／验证：错误凭据统一提示 “Invalid ID key or password”（Sprint 1 原有）。
@@ -187,6 +220,7 @@ public final class ConsoleUi {
     }
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：退出登录，回到访客菜单。
      */
@@ -197,22 +231,26 @@ public final class ConsoleUi {
     }
 
     /**
-     * 主负责人：Yuhan（菜单接线）；上传业务：Stella（Sprint 1）。审核人：Stella。
-     * 做什么：先检查登录，再用必填输入收集 ID、名称、路径；成功后显示识别出的格式。
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
+     * 主负责人：Yuhan（菜单接线）；上传业务：Stella（Sprint 1）。
+     * 做什么：先检查登录，再逐项收集并立即检查 ID、名称、路径（Stella 的 check 方法）；成功后显示识别出的格式。
      *
      * @throws IOException if the source file cannot be read
      */
     private void upload() throws IOException {
         accounts.requireUser();
-        String id = io.askRequired("Scroll ID: ", "Scroll ID");
-        String name = io.askRequired("Scroll name: ", "Scroll name");
-        String source = io.askRequired("Source file path: ", "Source file path");
-        DigitalScroll scroll = scrolls.upload(id, name, Path.of(source));
+        // 【US14 逐项检查】ID 已被使用、名称重复、文件不存在／过大都在输入当时提示，只重问该项。
+        io.info(ConsoleIO.CANCEL_HINT);
+        String id = io.askValid("Scroll ID: ", scrolls::checkNewScrollId);
+        String name = io.askValid("Scroll name: ", scrolls::checkNewScrollName);
+        Path source = io.askValid("Source file path: ", ScrollService::checkSource);
+        DigitalScroll scroll = scrolls.upload(id, name, source);
         io.info("Scroll uploaded successfully.");
         io.info("Detected format: " + scroll.getFileFormat());
     }
 
     /**
+     * 【PR s2-r4-integration】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan（接线）；页面：Stella。
      * 做什么：打开 “我的卷轴” 页面；未配置编辑服务时给出清楚的错误。
      */
@@ -225,6 +263,7 @@ public final class ConsoleUi {
     }
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：显示管理员可查看的用户资料，不显示密码哈希（Sprint 1 原有）。
      */
@@ -241,6 +280,7 @@ public final class ConsoleUi {
     }
 
     /**
+     * 【PR s2-r2-numbered-console】实现：Yuhan ｜ 审核：Henry
      * 主负责人：Yuhan。
      * 做什么：管理员删除用户；先检查权限再询问 ID。
      */
