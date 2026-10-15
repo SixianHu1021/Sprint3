@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.ScrollUploadTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-15T11:11:04.887Z" hostname="Macintosh-4.local" time="0.034">
+  <properties/>
+  <testcase name="guestsCannotUpload()" classname="org.example.ScrollUploadTest" time="0.002"/>
+  <testcase name="fileSizeLimits()" classname="org.example.ScrollUploadTest" time="0.02"/>
+  <testcase name="scrollIdAndNameAreValidated()" classname="org.example.ScrollUploadTest" time="0.002"/>
+  <testcase name="uploadedScrollAppearsInBrowse()" classname="org.example.ScrollUploadTest" time="0.002"/>
+  <testcase name="uploadStoresContentAndMetadata()" classname="org.example.ScrollUploadTest" time="0.002"/>
+  <testcase name="duplicateIdOrNameIsRejected()" classname="org.example.ScrollUploadTest" time="0.003"/>
+  <testcase name="invalidSourceFilesAreRejected()" classname="org.example.ScrollUploadTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

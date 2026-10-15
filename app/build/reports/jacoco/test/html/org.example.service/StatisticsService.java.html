@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatisticsService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.example.service</a> &gt; <span class="el_source">StatisticsService.java</span></div><h1>StatisticsService.java</h1><pre class="source lang-java linenums">package org.example.service;
+
+import java.util.List;
+import org.example.model.DigitalScroll;
+
+/**
+ * 【Sprint 2 · US12 #13】主负责人：Stella。审核人：Yuhan（管理员权限负责人）。
+ * 做什么：管理员查看每个卷轴的上传次数、下载次数，以及全站合计。非管理员调用会被拒绝。
+ * 对接／验证：权限调用 AccountService.requireAdmin（Henry 在 R1 改为 public）；数据来自 ScrollService.browse，
+ * 不直接读文件。界面在 Stella 的 StatisticsScreen。
+ */
+public final class StatisticsService {
+
+    /**
+     * 主负责人：Stella。
+     * 做什么：一行统计数据。
+     *
+     * @param scrollId scroll ID
+     * @param name scroll name
+     * @param uploaderId uploader ID key
+     * @param format file format
+     * @param uploads times the scroll's content has been uploaded
+     * @param downloads successful downloads
+     */
+<span class="fc" id="L25">    public record Row(String scrollId, String name, String uploaderId, String format, long uploads, long downloads) {</span>
+    }
+
+    /**
+     * 主负责人：Stella。
+     * 做什么：完整报告：每个卷轴一行，加上上传和下载合计。
+     *
+     * @param rows per-scroll statistics
+     * @param totalUploads sum of uploads
+     * @param totalDownloads sum of downloads
+     */
+<span class="fc" id="L36">    public record Report(List&lt;Row&gt; rows, long totalUploads, long totalDownloads) {</span>
+    }
+
+    private final ScrollService scrolls;
+    private final AccountService accounts;
+
+    /**
+     * 主负责人：Stella。
+     * 做什么：保存卷轴服务和账户服务引用。
+     * 对接／验证：ConsoleUi 使用同一组服务创建本类。
+     *
+     * @param scrolls scroll service providing the list
+     * @param accounts account service enforcing admin access
+     */
+<span class="fc" id="L50">    public StatisticsService(ScrollService scrolls, AccountService accounts) {</span>
+<span class="fc" id="L51">        this.scrolls = scrolls;</span>
+<span class="fc" id="L52">        this.accounts = accounts;</span>
+<span class="fc" id="L53">    }</span>
+
+    /**
+     * 主负责人：Stella。
+     * 做什么：先检查管理员，再生成每个卷轴的统计和合计。
+     * 对接／验证：浏览和预览不改变数字；下载、替换文件后数字变化（StatisticsServiceTest 验证）。
+     *
+     * @return statistics report
+     * @throws IllegalStateException if the current user is not an administrator
+     */
+    public Report report() {
+<span class="fc" id="L64">        accounts.requireAdmin();</span>
+<span class="fc" id="L65">        List&lt;DigitalScroll&gt; all = scrolls.browse();</span>
+<span class="fc" id="L66">        List&lt;Row&gt; rows = all.stream()</span>
+<span class="fc" id="L67">                .map(s -&gt; new Row(s.getScrollId(), s.getName(), s.getUploaderId(), s.getFileFormat(),</span>
+<span class="fc" id="L68">                        s.getUploadCount(), s.getDownloadCount()))</span>
+<span class="fc" id="L69">                .toList();</span>
+<span class="fc" id="L70">        long uploads = all.stream().mapToLong(DigitalScroll::getUploadCount).sum();</span>
+<span class="fc" id="L71">        long downloads = all.stream().mapToLong(DigitalScroll::getDownloadCount).sum();</span>
+<span class="fc" id="L72">        return new Report(rows, uploads, downloads);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

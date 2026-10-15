@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="10.21.4">
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/ui/PasswordReader.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/ui/MyScrollsScreen.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/ui/StatisticsScreen.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/ui/Menu.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/ui/BrowseScreen.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/ui/ConsoleIO.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/ui/ConsoleUi.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/ui/AccountScreens.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/repository/file/FileUserRepository.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/repository/file/FileScrollRepository.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/repository/file/AtomicPropertiesStore.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/repository/ScrollRepository.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/repository/UserRepository.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/security/Pbkdf2PasswordHasher.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/security/PasswordHasher.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/model/DigitalScroll.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/model/UserRole.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/model/User.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/App.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/service/FileFormat.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/service/ContactValidator.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/service/ScrollEditService.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/service/AccountService.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/service/StatisticsService.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/service/Validation.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/service/ScrollFilter.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/service/ScrollService.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/service/SortOrder.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/service/ScrollPreviewRenderer.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/main/java/org/example/service/ScrollQueryService.java">
+</file>
+</checkstyle>

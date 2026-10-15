@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.AccountServiceTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-15T11:10:59.894Z" hostname="Macintosh-4.local" time="0.025">
+  <properties/>
+  <testcase name="administratorLifecycle()" classname="org.example.AccountServiceTest" time="0.006"/>
+  <testcase name="loginAndLogoutEnforceSessionState()" classname="org.example.AccountServiceTest" time="0.002"/>
+  <testcase name="unauthorizedAdministrativeCallsAreRejected()" classname="org.example.AccountServiceTest" time="0.002"/>
+  <testcase name="idKeyLoginHasUniformFailuresAndPersistsSessionUntilLogout()" classname="org.example.AccountServiceTest" time="0.002"/>
+  <testcase name="requireUserReturnsAuthenticatedUser()" classname="org.example.AccountServiceTest" time="0.002"/>
+  <testcase name="adminCanCreateBothRoles()" classname="org.example.AccountServiceTest" time="0.004"/>
+  <testcase name="loginReplacesExistingSession()" classname="org.example.AccountServiceTest" time="0.002"/>
+  <testcase name="deletedAccountCannotAuthenticateAfterRestart()" classname="org.example.AccountServiceTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

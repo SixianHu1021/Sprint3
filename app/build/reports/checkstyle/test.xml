@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="10.21.4">
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/DuplicateContactTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/ScrollFormatTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/ScrollEditServiceTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/AccountConsoleTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/ConsoleUiTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/FileScrollRepositoryTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/ScrollBrowseTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/ScrollConsoleTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/StatisticsTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/FileFormatTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/AccountServiceTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/PasswordHasherTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/MyScrollsConsoleTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/FileUserRepositoryTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/ScrollDownloadTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/RegistrationTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/NumberedMenuConsoleTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/ProfileConsoleTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/ConsoleIOTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/MenuTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/BrowseConsoleTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/ScrollUploadTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/AppTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/ProfileServiceTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/ScrollStorageTest.java">
+</file>
+<file name="/Users/stellaxu/Desktop/soft2412/sprint2_copy/app/src/test/java/org/example/ScrollQueryServiceTest.java">
+</file>
+</checkstyle>

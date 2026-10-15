@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScrollService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.example.service</a> &gt; <span class="el_source">ScrollService.java</span></div><h1>ScrollService.java</h1><pre class="source lang-java linenums">package org.example.service;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import org.example.model.DigitalScroll;
+import org.example.model.User;
+import org.example.repository.ScrollRepository;
+
+/**
+ * Provides scroll operations on top of a scroll repository.
+ * Browsing and previewing are available without login; uploading requires login.
+ *
+ * &lt;p&gt;Sprint 2 变更（browse/find/preview 为 Sprint 1 原有，本轮不改）：
+ * &lt;ul&gt;
+ *   &lt;li&gt;R1 · Stella：download 改用 DigitalScroll.withRecordedDownload()，避免下载后丢失格式。审核人：Sixian。&lt;/li&gt;
+ *   &lt;li&gt;R2 · Sixian【US17 #52】：upload 记录文件格式；download 自动补正确扩展名并返回实际保存路径。
+ *       审核人：Stella（upload 原作者）。&lt;/li&gt;
+ * &lt;/ul&gt;
+ * 编辑、删除、统计、筛选、排序都放在新的服务类中，避免多人反复修改本文件。
+ */
+public final class ScrollService {
+
+    /** Largest accepted scroll size in bytes (10 MiB). */
+    public static final int MAX_BYTES = 10 * 1024 * 1024;
+
+    private final ScrollRepository scrolls;
+    private final AccountService accounts;
+    private final Clock clock;
+
+    /**
+     * Creates the service with the shared scroll repository, account service and clock.
+     * @param scrolls repository used by scroll operations
+     * @param accounts account service used to identify the logged-in user
+     * @param clock clock used to record upload dates
+     */
+<span class="fc" id="L42">    public ScrollService(ScrollRepository scrolls, AccountService accounts, Clock clock) {</span>
+<span class="fc" id="L43">        this.scrolls = Objects.requireNonNull(scrolls, &quot;scrolls&quot;);</span>
+<span class="fc" id="L44">        this.accounts = Objects.requireNonNull(accounts, &quot;accounts&quot;);</span>
+<span class="fc" id="L45">        this.clock = Objects.requireNonNull(clock, &quot;clock&quot;);</span>
+<span class="fc" id="L46">    }</span>
+
+    /**
+     * Uploads a local file as a new scroll owned by the logged-in user.
+     * The new scroll records the uploader's ID key, the current date,
+     * an upload count of 1 and a download count of 0.
+     *
+     * &lt;p&gt;主负责人：Stella（Sprint 1）；格式记录：Sixian（Sprint 2 · US17）。审核人：Stella。
+     *
+     * @param id unique scroll ID; surrounding whitespace is removed
+     * @param name unique scroll name; surrounding whitespace is removed
+     * @param source path of the local file to upload
+     * @return the saved scroll
+     * @throws IllegalStateException if no user is logged in, or saving fails
+     * @throws IllegalArgumentException if the ID or name is invalid or already used,
+     *         the source is not a regular file, or the file exceeds {@link #MAX_BYTES}
+     * @throws IOException if the file cannot be read
+     */
+    public DigitalScroll upload(String id, String name, Path source) throws IOException {
+<span class="fc" id="L65">        User owner = accounts.requireUser();</span>
+<span class="fc" id="L66">        id = Validation.text(id, &quot;Scroll ID&quot;);</span>
+<span class="fc" id="L67">        name = Validation.text(name, &quot;Scroll name&quot;);</span>
+<span class="fc bfc" id="L68" title="All 4 branches covered.">        if (scrolls.existsById(id) || scrolls.existsByName(name)) {</span>
+<span class="fc" id="L69">            throw new IllegalArgumentException(&quot;Scroll ID or name already exists&quot;);</span>
+        }
+<span class="fc bfc" id="L71" title="All 4 branches covered.">        if (source == null || !Files.isRegularFile(source)) {</span>
+<span class="fc" id="L72">            throw new IllegalArgumentException(&quot;Choose a readable regular file&quot;);</span>
+        }
+        byte[] content;
+<span class="fc" id="L75">        try (InputStream input = Files.newInputStream(source)) {</span>
+            // Read one byte past the limit so oversized files are detected without loading them fully.
+<span class="fc" id="L77">            content = input.readNBytes(MAX_BYTES + 1);</span>
+        }
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if (content.length &gt; MAX_BYTES) {</span>
+<span class="fc" id="L80">            throw new IllegalArgumentException(&quot;Scroll exceeds the 10 MiB limit&quot;);</span>
+        }
+        // 【Sprint 2 · US17 #52】Sixian：上传时按原文件名／内容记录格式。
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        String format = FileFormat.detect(source.getFileName() == null ? null : source.getFileName().toString(),</span>
+                content);
+<span class="fc" id="L85">        DigitalScroll scroll = new DigitalScroll(id, name, content, owner.getIdKey(), LocalDateTime.now(clock),</span>
+                1, 0, format);
+<span class="fc" id="L87">        scrolls.save(scroll);</span>
+<span class="fc" id="L88">        return scroll;</span>
+    }
+
+    /**
+     * Returns all available scrolls.
+     * Guests and registered users can browse without login.
+     *
+     * @return a list of available scrolls, or an empty list
+     */
+    public List&lt;DigitalScroll&gt; browse() {
+<span class="fc" id="L98">        return scrolls.findAll();</span>
+    }
+
+    /**
+     * Finds a scroll by its unique ID.
+     *
+     * @param id scroll ID
+     * @return the matching scroll
+     * @throws IllegalArgumentException if no scroll exists
+     */
+    private DigitalScroll find(String id) {
+<span class="fc bfc" id="L109" title="All 4 branches covered.">        if (id == null || id.isBlank()) {</span>
+<span class="fc" id="L110">            throw new IllegalArgumentException(&quot;Scroll ID is required&quot;);</span>
+        }
+
+<span class="fc" id="L113">        return scrolls.findById(id)</span>
+<span class="fc" id="L114">                .orElseThrow(() -&gt;</span>
+<span class="fc" id="L115">                        new IllegalArgumentException(</span>
+                                &quot;Scroll not found: &quot; + id));
+    }
+
+    /**
+     * Retrieves a scroll for preview.
+     * Previewing does not download the file or change counters.
+     *
+     * @param id ID of the scroll to preview
+     * @return the selected scroll
+     */
+    public DigitalScroll preview(String id) {
+<span class="fc" id="L127">        return find(id);</span>
+    }
+
+    /**
+     * Downloads a scroll to a local destination.
+     * Only authenticated users may download scrolls.
+     * A successful download increments the download count.
+     *
+     * &lt;p&gt;【Sprint 2 · US17 #52】主负责人：Sixian。审核人：Stella。
+     * 做什么：格式已知且目标文件名没有对应扩展名时，自动在末尾补上（例如 report → report.pdf），
+     * 写出原始字节后保存下载次数加 1 的卷轴（保留格式）。
+     * 对接／验证：返回实际写入的路径，界面显示给用户；格式为 unknown 时不改文件名。
+     *
+     * @param id ID of the scroll to download
+     * @param destination target file path
+     * @return the path actually written
+     * @throws IllegalStateException if no user is logged in
+     * @throws IllegalArgumentException if the scroll ID or destination is invalid
+     * @throws IOException if writing the file fails
+     */
+    public Path download(String id, Path destination) throws IOException {
+<span class="fc" id="L148">        accounts.requireUser();</span>
+
+<span class="fc" id="L150">        DigitalScroll scroll = find(id);</span>
+
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        if (destination == null) {</span>
+<span class="fc" id="L153">            throw new IllegalArgumentException(&quot;Download destination is required&quot;);</span>
+        }
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        if (Files.isDirectory(destination)) {</span>
+            // 与 Sprint 1 一致：写入失败类错误使用 IOException（ScrollDownloadTest 依赖）。
+<span class="fc" id="L157">            throw new IOException(&quot;Destination must be a file path, not a folder&quot;);</span>
+        }
+
+<span class="fc" id="L160">        Path target = withExtension(destination, scroll.getFileFormat());</span>
+<span class="fc" id="L161">        Files.write(target, scroll.getContent());</span>
+
+        // Stella（R1）：用 withRecordedDownload 代替 7 参数构造方法，保留文件格式。
+<span class="fc" id="L164">        scrolls.save(scroll.withRecordedDownload());</span>
+<span class="fc" id="L165">        return target;</span>
+    }
+
+    /**
+     * 【Sprint 2 · US17 #52】主负责人：Sixian。
+     * 做什么：目标文件名已以该格式结尾（不区分大小写，jpg 与 jpeg 视为相同）就保持不变，否则补上扩展名。
+     * 对接／验证：ScrollFormatTest 覆盖已带扩展名、缺少扩展名、错误扩展名和 unknown。
+     *
+     * @param destination requested path
+     * @param format scroll format
+     * @return path to write
+     */
+    static Path withExtension(Path destination, String format) {
+<span class="pc bpc" id="L178" title="2 of 4 branches missed.">        if (destination.getFileName() == null || format == null</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">                || format.equals(DigitalScroll.UNKNOWN_FORMAT)) {</span>
+<span class="fc" id="L180">            return destination;</span>
+        }
+<span class="fc" id="L182">        String name = destination.getFileName().toString();</span>
+<span class="fc" id="L183">        String lower = name.toLowerCase(java.util.Locale.ROOT);</span>
+<span class="pc bpc" id="L184" title="1 of 4 branches missed.">        boolean jpegAlias = (format.equals(&quot;jpg&quot;) &amp;&amp; lower.endsWith(&quot;.jpeg&quot;))</span>
+<span class="pc bpc" id="L185" title="3 of 4 branches missed.">                || (format.equals(&quot;jpeg&quot;) &amp;&amp; lower.endsWith(&quot;.jpg&quot;));</span>
+<span class="fc bfc" id="L186" title="All 4 branches covered.">        if (lower.endsWith(&quot;.&quot; + format) || jpegAlias) {</span>
+<span class="fc" id="L187">            return destination;</span>
+        }
+<span class="fc" id="L189">        return destination.resolveSibling(name + &quot;.&quot; + format);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.DuplicateContactTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-15T11:11:00.245Z" hostname="Macintosh-4.local" time="0.014">
+  <properties/>
+  <testcase name="profileUpdateCannotTakeAnotherUsersContacts()" classname="org.example.DuplicateContactTest" time="0.003"/>
+  <testcase name="emailIsStoredInLowercase()" classname="org.example.DuplicateContactTest" time="0.002"/>
+  <testcase name="phoneFormatIsValidated()" classname="org.example.DuplicateContactTest" time="0.001"/>
+  <testcase name="registrationRejectsDuplicatePhoneIgnoringSeparators()" classname="org.example.DuplicateContactTest" time="0.002"/>
+  <testcase name="repositoryLookupsHandleMissingValues()" classname="org.example.DuplicateContactTest" time="0.002"/>
+  <testcase name="adminCreatedUsersFollowTheSameRules()" classname="org.example.DuplicateContactTest" time="0.002"/>
+  <testcase name="registrationRejectsDuplicateEmailIgnoringCase()" classname="org.example.DuplicateContactTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

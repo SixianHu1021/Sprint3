@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.ProfileConsoleTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-15T11:11:00.926Z" hostname="Macintosh-4.local" time="0.018">
+  <properties/>
+  <testcase name="adminFormSelectsRoleByNumberAndRetriesInvalidRole()" classname="org.example.ProfileConsoleTest" time="0.004"/>
+  <testcase name="guestCannotOpenProfile()" classname="org.example.ProfileConsoleTest" time="0.002"/>
+  <testcase name="passwordChangeNeedsMatchingConfirmation()" classname="org.example.ProfileConsoleTest" time="0.003"/>
+  <testcase name="profileShowsDetailsAndKeepsBlankFields()" classname="org.example.ProfileConsoleTest" time="0.003"/>
+  <testcase name="blankRegistrationFieldIsRepromptedImmediately()" classname="org.example.ProfileConsoleTest" time="0.003"/>
+  <testcase name="duplicateEmailIsReportedAndProfileKept()" classname="org.example.ProfileConsoleTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

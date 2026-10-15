@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.BrowseConsoleTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-15T11:11:00.147Z" hostname="Macintosh-4.local" time="0.06">
+  <properties/>
+  <testcase name="emptyLibraryShowsMessage()" classname="org.example.BrowseConsoleTest" time="0.008"/>
+  <testcase name="sortByDownloadCountShowsOrderInHeader()" classname="org.example.BrowseConsoleTest" time="0.011"/>
+  <testcase name="guestSeesLoginRequiredAndCannotDownload()" classname="org.example.BrowseConsoleTest" time="0.01"/>
+  <testcase name="previewShowsFormatAwareContentAndDownloadAddsExtension()" classname="org.example.BrowseConsoleTest" time="0.007"/>
+  <testcase name="filterByUploaderThenClear()" classname="org.example.BrowseConsoleTest" time="0.006"/>
+  <testcase name="showsNumberedMenuAndHeader()" classname="org.example.BrowseConsoleTest" time="0.005"/>
+  <testcase name="filtersByIdNameAndDateAndShowsEmptyState()" classname="org.example.BrowseConsoleTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

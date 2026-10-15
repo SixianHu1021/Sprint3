@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AtomicPropertiesStore.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.example.repository.file</a> &gt; <span class="el_source">AtomicPropertiesStore.java</span></div><h1>AtomicPropertiesStore.java</h1><pre class="source lang-java linenums">package org.example.repository.file;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Properties;
+
+/**
+ * Reads and writes UTF-8 properties snapshots for user and scroll repositories.
+ * Intended for a single application process without concurrent writers.
+ */
+public final class AtomicPropertiesStore {
+    private final Path file;
+
+    /**
+     * Creates a store with an absolute snapshot path.
+     * @param file snapshot file path
+     */
+<span class="fc" id="L24">    public AtomicPropertiesStore(Path file) {</span>
+<span class="fc" id="L25">        this.file = file.toAbsolutePath();</span>
+<span class="fc" id="L26">    }</span>
+
+    /**
+     * Loads properties, returning an empty snapshot if the file does not exist.
+     * @return loaded properties
+     * @throws IllegalStateException if reading fails or properties syntax is invalid
+     */
+    public Properties read() {
+<span class="fc" id="L34">        Properties data = new Properties();</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (Files.notExists(file)) {</span>
+<span class="fc" id="L36">            return data;</span>
+        }
+<span class="fc" id="L38">        try (Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {</span>
+<span class="fc" id="L39">            data.load(reader);</span>
+<span class="fc" id="L40">            return data;</span>
+<span class="fc" id="L41">        } catch (IOException | IllegalArgumentException e) {</span>
+<span class="fc" id="L42">            throw new IllegalStateException(&quot;Cannot read data file: &quot; + file, e);</span>
+        }
+    }
+
+    /**
+     * Writes a temporary snapshot and replaces the destination after closing the writer.
+     * Creates missing parent directories and attempts an atomic move. If unsupported,
+     * falls back to regular replacement without the same atomicity guarantee.
+     * @param data properties to persist
+     * @throws IllegalStateException if writing or replacing the snapshot fails
+     */
+    public void write(Properties data) {
+<span class="fc" id="L54">        Path temporary = null;</span>
+        try {
+<span class="fc" id="L56">            Files.createDirectories(file.getParent());</span>
+<span class="fc" id="L57">            temporary = Files.createTempFile(file.getParent(), &quot;vsas-&quot;, &quot;.tmp&quot;);</span>
+<span class="fc" id="L58">            try (Writer writer = Files.newBufferedWriter(temporary, StandardCharsets.UTF_8)) {</span>
+<span class="fc" id="L59">                data.store(writer, &quot;VSAS Sprint 1 snapshot&quot;);</span>
+            }
+            try {
+<span class="fc" id="L62">                Files.move(temporary, file, StandardCopyOption.ATOMIC_MOVE,</span>
+                        StandardCopyOption.REPLACE_EXISTING);
+<span class="nc" id="L64">            } catch (AtomicMoveNotSupportedException e) {</span>
+<span class="nc" id="L65">                Files.move(temporary, file, StandardCopyOption.REPLACE_EXISTING);</span>
+<span class="fc" id="L66">            }</span>
+<span class="fc" id="L67">        } catch (IOException e) {</span>
+<span class="fc" id="L68">            throw new IllegalStateException(&quot;Cannot save data file: &quot; + file, e);</span>
+        } finally {
+<span class="fc bfc" id="L70" title="All 2 branches covered.">            if (temporary != null) {</span>
+                try {
+<span class="fc" id="L72">                    Files.deleteIfExists(temporary);</span>
+<span class="nc" id="L73">                } catch (IOException e) {</span>
+                    // Cleanup is best-effort and must not mask the write result.
+<span class="fc" id="L75">                }</span>
+            }
+        }
+<span class="fc" id="L78">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

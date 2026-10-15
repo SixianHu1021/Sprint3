@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.ScrollConsoleTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-15T11:11:04.705Z" hostname="Macintosh-4.local" time="0.043">
+  <properties/>
+  <testcase name="guestCannotDownloadFromBrowseOrPreview()" classname="org.example.ScrollConsoleTest" time="0.004"/>
+  <testcase name="administratorCanUploadThroughConsole()" classname="org.example.ScrollConsoleTest" time="0.003"/>
+  <testcase name="guestCanBrowseAndPreview()" classname="org.example.ScrollConsoleTest" time="0.003"/>
+  <testcase name="memberCanDownloadFromBrowse()" classname="org.example.ScrollConsoleTest" time="0.003"/>
+  <testcase name="uploadAppearsOnlyInAuthenticatedMenus()" classname="org.example.ScrollConsoleTest" time="0.001"/>
+  <testcase name="invalidUploadShowsErrorAndDoesNotSave()" classname="org.example.ScrollConsoleTest" time="0.002"/>
+  <testcase name="invalidPreviewIdDoesNotExitBrowse()" classname="org.example.ScrollConsoleTest" time="0.003"/>
+  <testcase name="failedDownloadDoesNotReportSuccess()" classname="org.example.ScrollConsoleTest" time="0.003"/>
+  <testcase name="previewBackReturnsToBrowseAndMainMenu()" classname="org.example.ScrollConsoleTest" time="0.003"/>
+  <testcase name="previewDoesNotIncrementDownloadCount()" classname="org.example.ScrollConsoleTest" time="0.003"/>
+  <testcase name="downloadReturnsToBrowse()" classname="org.example.ScrollConsoleTest" time="0.003"/>
+  <testcase name="memberCanDownloadFromPreview()" classname="org.example.ScrollConsoleTest" time="0.004"/>
+  <testcase name="memberCanUploadThroughConsole()" classname="org.example.ScrollConsoleTest" time="0.002"/>
+  <testcase name="guestCannotUploadThroughConsole()" classname="org.example.ScrollConsoleTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

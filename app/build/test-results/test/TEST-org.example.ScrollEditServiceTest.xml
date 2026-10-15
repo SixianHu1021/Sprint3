@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.ScrollEditServiceTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-15T11:11:04.779Z" hostname="Macintosh-4.local" time="0.033">
+  <properties/>
+  <testcase name="updatingAScrollKeepsItsPositionInTheList()" classname="org.example.ScrollEditServiceTest" time="0.003"/>
+  <testcase name="listsOnlyOwnScrolls()" classname="org.example.ScrollEditServiceTest" time="0.003"/>
+  <testcase name="renameKeepsEverythingElseAndPersists()" classname="org.example.ScrollEditServiceTest" time="0.004"/>
+  <testcase name="cannotEditOrDeleteOtherUsersScrolls()" classname="org.example.ScrollEditServiceTest" time="0.003"/>
+  <testcase name="replaceContentRejectsMissingFileWithoutChanges()" classname="org.example.ScrollEditServiceTest" time="0.003"/>
+  <testcase name="renameRejectsDuplicateOrBlankNames()" classname="org.example.ScrollEditServiceTest" time="0.004"/>
+  <testcase name="missingScrollsAndGuestsAreRejected()" classname="org.example.ScrollEditServiceTest" time="0.003"/>
+  <testcase name="deleteRemovesScrollFromBrowseAndAfterRestart()" classname="org.example.ScrollEditServiceTest" time="0.004"/>
+  <testcase name="replaceContentUpdatesFormatAndUploadCountButKeepsDownloads()" classname="org.example.ScrollEditServiceTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

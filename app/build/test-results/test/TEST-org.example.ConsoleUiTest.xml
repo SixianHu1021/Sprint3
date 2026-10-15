@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.ConsoleUiTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-15T11:11:00.216Z" hostname="Macintosh-4.local" time="0.028">
+  <properties/>
+  <testcase name="memberCannotAccessAdminOperations()" classname="org.example.ConsoleUiTest" time="0.003"/>
+  <testcase name="failedLoginShowsError()" classname="org.example.ConsoleUiTest" time="0.002"/>
+  <testcase name="userListDoesNotExposePasswordHash()" classname="org.example.ConsoleUiTest" time="0.006"/>
+  <testcase name="adminCanDeleteUserFromConsole()" classname="org.example.ConsoleUiTest" time="0.003"/>
+  <testcase name="adminCannotDeleteOwnAccount()" classname="org.example.ConsoleUiTest" time="0.003"/>
+  <testcase name="loginDisplaysCorrectIdentity()" classname="org.example.ConsoleUiTest" time="0.002"/>
+  <testcase name="logoutReturnsToGuestMenu()" classname="org.example.ConsoleUiTest" time="0.002"/>
+  <testcase name="memberMenuHidesAdminCommands()" classname="org.example.ConsoleUiTest" time="0.002"/>
+  <testcase name="guestMenuShowsAvailableCommands()" classname="org.example.ConsoleUiTest" time="0.002"/>
+  <testcase name="adminMenuShowsManagementCommands()" classname="org.example.ConsoleUiTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

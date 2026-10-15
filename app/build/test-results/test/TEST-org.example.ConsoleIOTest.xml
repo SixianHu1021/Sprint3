@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.ConsoleIOTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-15T11:11:00.208Z" hostname="Macintosh-4.local" time="0.008">
+  <properties/>
+  <testcase name="validationMessagesExplainTheProblem()" classname="org.example.ConsoleIOTest" time="0.001"/>
+  <testcase name="terminalWithoutMaskingShowsWarningThenReadsLine()" classname="org.example.ConsoleIOTest" time="0.001"/>
+  <testcase name="requiredInputRepromptsOnBlankAndTrims()" classname="org.example.ConsoleIOTest" time="0.001"/>
+  <testcase name="maskedPasswordIsReadWithoutEchoAndCleared()" classname="org.example.ConsoleIOTest" time="0.001"/>
+  <testcase name="closedHiddenInputEndsTheSession()" classname="org.example.ConsoleIOTest" time="0.001"/>
+  <testcase name="systemFactoryCreatesUsableHelper()" classname="org.example.ConsoleIOTest" time="0.0"/>
+  <testcase name="optionalInputMayBeEmpty()" classname="org.example.ConsoleIOTest" time="0.0"/>
+  <testcase name="scriptModeReadsPasswordWithoutWarning()" classname="org.example.ConsoleIOTest" time="0.001"/>
+  <testcase name="confirmationAcceptsYesNoAndRetriesOtherInput()" classname="org.example.ConsoleIOTest" time="0.0"/>
+  <testcase name="errorsUseOneSharedFormat()" classname="org.example.ConsoleIOTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

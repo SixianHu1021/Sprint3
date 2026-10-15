@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountScreens.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.example.ui</a> &gt; <span class="el_source">AccountScreens.java</span></div><h1>AccountScreens.java</h1><pre class="source lang-java linenums">package org.example.ui;
+
+import java.util.Locale;
+import org.example.model.User;
+import org.example.model.UserRole;
+import org.example.service.AccountService;
+
+/**
+ * 【Sprint 2 · US03 #4 / US16 #51 / US12 #13】主负责人：Henry。审核人：Yuhan（菜单集成）。
+ * 做什么：账户相关的控制台页面：注册／首次管理员／管理员添加用户的资料表单（从 Sprint 1 ConsoleUi.createAccount 移来），
+ * 以及新的“我的资料”页面（查看资料、修改姓名邮箱电话、修改密码）。
+ * 对接／验证：所有输入通过 Yuhan 的 ConsoleIO（必填立即重问、密码隐藏）；业务规则全部在 AccountService，
+ * 本类不重复写校验。Yuhan 在 R4 把 ConsoleUi 的 register/add-user/profile 菜单项接到这里。
+ */
+public final class AccountScreens {
+
+    private final AccountService accounts;
+    private final ConsoleIO io;
+
+    /**
+     * 主负责人：Henry。
+     * 做什么：保存账户服务和共用输入输出。
+     * 对接／验证：ConsoleUi 构造时创建一次。
+     *
+     * @param accounts account service
+     * @param io shared console helper
+     */
+<span class="fc" id="L28">    public AccountScreens(AccountService accounts, ConsoleIO io) {</span>
+<span class="fc" id="L29">        this.accounts = accounts;</span>
+<span class="fc" id="L30">        this.io = io;</span>
+<span class="fc" id="L31">    }</span>
+
+    /**
+     * 主负责人：Henry（Sprint 1 写法，Sprint 2 改用 ConsoleIO）。
+     * 做什么：收集 ID、用户名、密码、姓名、邮箱、电话；按模式调用 bootstrapAdmin、addUser 或 register。
+     * 管理员模式先检查权限，再询问资料（未授权时不会出现 “Full name:” 提示）。
+     * 对接／验证：空白字段在输入时立即重问（US14）；重复邮箱／电话由 AccountService 拒绝并说明字段（US16）；
+     * 管理员可选择 MEMBER 或 ADMIN（US12）。AccountConsoleTest 覆盖三种模式。
+     *
+     * @param mode {@code bootstrap}, {@code admin} or {@code register}
+     */
+    public void createAccount(String mode) {
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        if (mode.equals(&quot;admin&quot;)) {</span>
+<span class="fc" id="L44">            accounts.listUsers();</span>
+        }
+<span class="fc" id="L46">        String id = io.askRequired(&quot;ID key: &quot;, &quot;ID key&quot;);</span>
+<span class="fc" id="L47">        String username = io.askRequired(&quot;Username: &quot;, &quot;Username&quot;);</span>
+<span class="fc" id="L48">        String password = io.password(&quot;Password: &quot;);</span>
+<span class="fc" id="L49">        String name = io.askRequired(&quot;Full name: &quot;, &quot;Full name&quot;);</span>
+<span class="fc" id="L50">        String email = io.askRequired(&quot;Email: &quot;, &quot;Email&quot;);</span>
+<span class="fc" id="L51">        String phone = io.askRequired(&quot;Phone: &quot;, &quot;Phone&quot;);</span>
+<span class="fc bfc" id="L52" title="All 3 branches covered.">        switch (mode) {</span>
+<span class="fc" id="L53">            case &quot;bootstrap&quot; -&gt; accounts.bootstrapAdmin(id, username, password, name, email, phone);</span>
+<span class="fc" id="L54">            case &quot;admin&quot; -&gt; accounts.addUser(id, username, password, name, email, phone, askRole());</span>
+<span class="fc" id="L55">            default -&gt; accounts.register(id, username, password, name, email, phone);</span>
+        }
+<span class="fc" id="L57">        io.info(&quot;Account created. Use login to sign in.&quot;);</span>
+<span class="fc" id="L58">    }</span>
+
+    /**
+     * 主负责人：Henry。
+     * 做什么：管理员添加用户时选择角色：1 或 MEMBER、2 或 ADMIN；其他输入显示错误并重问。
+     * 对接／验证：US12 “管理员可以创建管理员和普通用户”；US14 输入错误不退出表单。
+     */
+    private UserRole askRole() {
+        while (true) {
+<span class="fc" id="L67">            String value = io.ask(&quot;Role (1 = MEMBER, 2 = ADMIN): &quot;).strip().toUpperCase(Locale.ROOT);</span>
+<span class="fc bfc" id="L68" title="All 4 branches covered.">            if (value.equals(&quot;1&quot;) || value.equals(&quot;MEMBER&quot;)) {</span>
+<span class="fc" id="L69">                return UserRole.MEMBER;</span>
+            }
+<span class="fc bfc" id="L71" title="All 4 branches covered.">            if (value.equals(&quot;2&quot;) || value.equals(&quot;ADMIN&quot;)) {</span>
+<span class="fc" id="L72">                return UserRole.ADMIN;</span>
+            }
+<span class="fc" id="L74">            io.error(&quot;Role must be 1 (MEMBER) or 2 (ADMIN).&quot;);</span>
+<span class="fc" id="L75">        }</span>
+    }
+
+    /**
+     * 【Sprint 2 · US03 #4】主负责人：Henry。
+     * 做什么：“我的资料”页面：每轮先显示当前资料，再显示编号菜单（修改资料 / 修改密码 / 返回）。
+     * 对接／验证：访客无法进入（requireUser）；ID key 只显示、不可修改。ProfileConsoleTest 覆盖。
+     */
+    public void profile() {
+<span class="fc" id="L84">        accounts.requireUser();</span>
+<span class="fc" id="L85">        Menu menu = new Menu(&quot;Profile menu:&quot;, &quot;Back&quot;, &quot;back&quot;)</span>
+<span class="fc" id="L86">                .option(&quot;Edit full name, email and phone&quot;, &quot;edit&quot;, a -&gt; editDetails())</span>
+<span class="fc" id="L87">                .option(&quot;Change password&quot;, &quot;password&quot;, a -&gt; changePassword());</span>
+<span class="fc" id="L88">        menu.loop(io, &quot;Profile&gt; &quot;, this::showProfile);</span>
+<span class="fc" id="L89">    }</span>
+
+    /**
+     * 【Sprint 2 · US03 #4】主负责人：Henry。
+     * 做什么：显示 ID、用户名、姓名、邮箱、电话和角色；不显示密码或哈希。
+     * 对接／验证：数据每次从 AccountService.currentUser 重新读取，修改后立即看到新值。
+     */
+    private void showProfile() {
+<span class="fc" id="L97">        User user = accounts.requireUser();</span>
+<span class="fc" id="L98">        io.info(&quot;Your profile:&quot;);</span>
+<span class="fc" id="L99">        io.info(&quot;  ID key:    &quot; + user.getIdKey() + &quot; (cannot be changed)&quot;);</span>
+<span class="fc" id="L100">        io.info(&quot;  Username:  &quot; + user.getUsername());</span>
+<span class="fc" id="L101">        io.info(&quot;  Full name: &quot; + user.getFullName());</span>
+<span class="fc" id="L102">        io.info(&quot;  Email:     &quot; + user.getEmail());</span>
+<span class="fc" id="L103">        io.info(&quot;  Phone:     &quot; + user.getPhone());</span>
+<span class="fc" id="L104">        io.info(&quot;  Role:      &quot; + user.getRole());</span>
+<span class="fc" id="L105">    }</span>
+
+    /**
+     * 【Sprint 2 · US03 #4 / US16 #51】主负责人：Henry。
+     * 做什么：逐项询问新值，直接回车保留原值，然后一次性保存。
+     * 对接／验证：邮箱／电话与他人重复时显示 “Error: Email address is already registered…” 并保持原资料。
+     */
+    private void editDetails() {
+<span class="fc" id="L113">        User user = accounts.requireUser();</span>
+<span class="fc" id="L114">        String name = keep(io.askOptional(&quot;Full name [&quot; + user.getFullName() + &quot;]: &quot;), user.getFullName());</span>
+<span class="fc" id="L115">        String email = keep(io.askOptional(&quot;Email [&quot; + user.getEmail() + &quot;]: &quot;), user.getEmail());</span>
+<span class="fc" id="L116">        String phone = keep(io.askOptional(&quot;Phone [&quot; + user.getPhone() + &quot;]: &quot;), user.getPhone());</span>
+<span class="fc" id="L117">        accounts.updateProfile(name, email, phone);</span>
+<span class="fc" id="L118">        io.info(&quot;Profile updated.&quot;);</span>
+<span class="fc" id="L119">    }</span>
+
+    /**
+     * 【Sprint 2 · US03 #4 / US15 #50】主负责人：Henry。
+     * 做什么：输入当前密码、新密码和确认密码（全部隐藏输入）；两次新密码不一致时不调用服务。
+     * 对接／验证：当前密码错误、长度不符合时显示错误；成功后新密码以哈希保存。
+     */
+    private void changePassword() {
+<span class="fc" id="L127">        String current = io.password(&quot;Current password: &quot;);</span>
+<span class="fc" id="L128">        String next = io.password(&quot;New password: &quot;);</span>
+<span class="fc" id="L129">        String confirm = io.password(&quot;Confirm new password: &quot;);</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        if (!next.equals(confirm)) {</span>
+<span class="fc" id="L131">            throw new IllegalArgumentException(&quot;New passwords do not match&quot;);</span>
+        }
+<span class="fc" id="L133">        accounts.changePassword(current, next);</span>
+<span class="fc" id="L134">        io.info(&quot;Password changed.&quot;);</span>
+<span class="fc" id="L135">    }</span>
+
+    /**
+     * 主负责人：Henry。
+     * 做什么：空输入表示保留原值。
+     */
+    private static String keep(String value, String current) {
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        return value.isEmpty() ? current : value;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

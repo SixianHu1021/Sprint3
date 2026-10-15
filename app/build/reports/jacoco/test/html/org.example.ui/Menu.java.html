@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Menu.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.example.ui</a> &gt; <span class="el_source">Menu.java</span></div><h1>Menu.java</h1><pre class="source lang-java linenums">package org.example.ui;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * 【Sprint 2 · US13 #48】主负责人：Yuhan。审核人：Sixian、Stella（各自页面使用者）。
+ * 做什么：通用编号菜单。显示 “1. Browse scrolls … 0. Quit”，读取编号并调用对应动作；
+ * 也接受 Sprint 1 的命令词（如 browse、preview s1）作为别名，旧脚本与习惯仍可用。
+ * 对接／验证：主菜单、浏览页、预览页、我的卷轴、个人资料等全部用本类，保证编号格式一致；
+ * 越界数字和非数字输入只显示错误，不退出菜单。
+ */
+public final class Menu {
+
+    /**
+     * 主负责人：Yuhan。
+     * 做什么：菜单项要执行的动作；argument 是别名后面的参数（例如 “preview s1” 中的 s1），没有就是空字符串。
+     * 对接／验证：各页面负责人写自己的动作，不在这里写业务规则。
+     */
+    @FunctionalInterface
+    public interface Action {
+        /**
+         * Runs the selected option.
+         *
+         * @param argument text after a typed alias, or an empty string
+         * @throws IOException if the action fails while reading or writing files
+         */
+        void run(String argument) throws IOException;
+    }
+
+    /**
+     * 主负责人：Yuhan。
+     * 做什么：一个菜单项：显示文字、可选别名、动作。
+     * 对接／验证：hidden 项不编号也不显示，但可以用别名输入；权限仍由服务层检查（例如会员手动输入 users 会被拒绝）。
+     *
+     * @param label text shown after the number
+     * @param alias command word accepted instead of the number, or {@code null}
+     * @param hidden whether the option is omitted from the numbered list
+     * @param action what to do when selected
+     */
+<span class="fc" id="L43">    private record Option(String label, String alias, boolean hidden, Action action) {</span>
+    }
+
+    private final String title;
+    private final String exitLabel;
+    private final String exitAlias;
+<span class="fc" id="L49">    private final List&lt;Option&gt; options = new ArrayList&lt;&gt;();</span>
+
+    /**
+     * 主负责人：Yuhan。
+     * 做什么：创建菜单；选项 0 固定为退出／返回。
+     * 对接／验证：主菜单用 “Quit/quit”，子页面用 “Back/back”。
+     *
+     * @param title heading such as {@code Member menu:}
+     * @param exitLabel label for option 0
+     * @param exitAlias command word for option 0
+     */
+<span class="fc" id="L60">    public Menu(String title, String exitLabel, String exitAlias) {</span>
+<span class="fc" id="L61">        this.title = title;</span>
+<span class="fc" id="L62">        this.exitLabel = exitLabel;</span>
+<span class="fc" id="L63">        this.exitAlias = exitAlias;</span>
+<span class="fc" id="L64">    }</span>
+
+    /**
+     * 主负责人：Yuhan。
+     * 做什么：增加一个显示并编号的选项。
+     * 对接／验证：按加入顺序编号 1、2、3…；需要固定编号的共用选项应先加入。
+     *
+     * @param label text shown after the number
+     * @param alias command word accepted instead of the number, or {@code null}
+     * @param action what to do when selected
+     * @return this menu
+     */
+    public Menu option(String label, String alias, Action action) {
+<span class="fc" id="L77">        options.add(new Option(label, alias, false, action));</span>
+<span class="fc" id="L78">        return this;</span>
+    }
+
+    /**
+     * 主负责人：Yuhan。
+     * 做什么：增加一个不显示、只能用别名触发的选项（例如访客菜单里的 upload）。
+     * 对接／验证：用于保留 Sprint 1 命令词并给出清楚的权限错误，不用于隐藏正常功能。
+     *
+     * @param alias command word
+     * @param action what to do when selected
+     * @return this menu
+     */
+    public Menu hidden(String alias, Action action) {
+<span class="fc" id="L91">        options.add(new Option(alias, alias, true, action));</span>
+<span class="fc" id="L92">        return this;</span>
+    }
+
+    /**
+     * 主负责人：Yuhan。
+     * 做什么：打印标题和 “  1. xxx” 形式的编号选项，最后打印 “  0. Quit/Back”。
+     * 对接／验证：ConsoleUiTest/MenuTest 检查这种格式。
+     *
+     * @param io shared console helper
+     */
+    public void render(ConsoleIO io) {
+<span class="fc" id="L103">        io.info(title);</span>
+<span class="fc" id="L104">        List&lt;Option&gt; visible = visibleOptions();</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        for (int i = 0; i &lt; visible.size(); i++) {</span>
+<span class="fc" id="L106">            io.info(&quot;  &quot; + (i + 1) + &quot;. &quot; + visible.get(i).label());</span>
+        }
+<span class="fc" id="L108">        io.info(&quot;  0. &quot; + exitLabel);</span>
+<span class="fc" id="L109">    }</span>
+
+    /**
+     * 主负责人：Yuhan。
+     * 做什么：显示菜单、读取一次选择并执行。返回 false 表示用户选了 0（退出／返回）。
+     * 动作抛出的 IllegalArgumentException / IllegalStateException / IOException 统一显示为 “Error: …”，
+     * 用户留在同一菜单可立即重试。
+     * 对接／验证：输入流结束（NoSuchElementException）不在这里吞掉，交给 ConsoleUi.run 结束程序。
+     *
+     * @param io shared console helper
+     * @param prompt prompt such as {@code &gt; } or {@code Browse&gt; }
+     * @return false when the exit option was chosen
+     */
+    public boolean runOnce(ConsoleIO io, String prompt) {
+<span class="fc" id="L123">        render(io);</span>
+<span class="fc" id="L124">        String raw = io.ask(prompt);</span>
+        Selection selection;
+        try {
+<span class="fc" id="L127">            selection = select(raw);</span>
+<span class="fc" id="L128">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L129">            io.error(e.getMessage());</span>
+<span class="fc" id="L130">            return true;</span>
+<span class="fc" id="L131">        }</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        if (selection == null) {</span>
+<span class="fc" id="L133">            return false;</span>
+        }
+        try {
+<span class="fc" id="L136">            selection.option().action().run(selection.argument());</span>
+<span class="fc" id="L137">        } catch (IllegalArgumentException | IllegalStateException | IOException e) {</span>
+<span class="fc" id="L138">            io.error(e.getMessage());</span>
+<span class="fc" id="L139">        }</span>
+<span class="fc" id="L140">        return true;</span>
+    }
+
+    /**
+     * 主负责人：Yuhan。
+     * 做什么：把输入解析成选项：数字按编号；否则按别名匹配第一个词，剩余部分作为参数。
+     * 对接／验证：空输入、越界数字、未知文字都抛出 IllegalArgumentException，消息说明可选范围。
+     *
+     * @param raw user input
+     * @return the selected option, or {@code null} for the exit option
+     * @throws IllegalArgumentException if the input does not select an option
+     */
+    Selection select(String raw) {
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">        String text = raw == null ? &quot;&quot; : raw.strip();</span>
+<span class="fc" id="L154">        int max = visibleOptions().size();</span>
+<span class="fc" id="L155">        String range = &quot;Please enter a number between 0 and &quot; + max + &quot;.&quot;;</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if (text.isEmpty()) {</span>
+<span class="fc" id="L157">            throw new IllegalArgumentException(&quot;No option entered. &quot; + range);</span>
+        }
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if (text.chars().allMatch(Character::isDigit)) {</span>
+            int number;
+            try {
+<span class="fc" id="L162">                number = Integer.parseInt(text);</span>
+<span class="fc" id="L163">            } catch (NumberFormatException e) {</span>
+<span class="fc" id="L164">                throw new IllegalArgumentException(&quot;'&quot; + text + &quot;' is out of range. &quot; + range);</span>
+<span class="fc" id="L165">            }</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">            if (number == 0) {</span>
+<span class="fc" id="L167">                return null;</span>
+            }
+<span class="fc bfc" id="L169" title="All 2 branches covered.">            if (number &gt; max) {</span>
+<span class="fc" id="L170">                throw new IllegalArgumentException(&quot;'&quot; + text + &quot;' is out of range. &quot; + range);</span>
+            }
+<span class="fc" id="L172">            return new Selection(visibleOptions().get(number - 1), &quot;&quot;);</span>
+        }
+<span class="fc" id="L174">        String[] parts = text.split(&quot;\\s+&quot;, 2);</span>
+<span class="fc" id="L175">        String word = parts[0].toLowerCase(Locale.ROOT);</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        String argument = parts.length &gt; 1 ? parts[1].strip() : &quot;&quot;;</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        if (word.equals(exitAlias)) {</span>
+<span class="fc" id="L178">            return null;</span>
+        }
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        for (Option option : options) {</span>
+<span class="pc bpc" id="L181" title="1 of 4 branches missed.">            if (option.alias() != null &amp;&amp; option.alias().equals(word)) {</span>
+<span class="fc" id="L182">                return new Selection(option, argument);</span>
+            }
+<span class="fc" id="L184">        }</span>
+<span class="fc" id="L185">        throw new IllegalArgumentException(&quot;'&quot; + text + &quot;' is not a valid option. &quot; + range);</span>
+    }
+
+    /**
+     * 主负责人：Yuhan。
+     * 做什么：返回需要编号显示的选项。
+     * 对接／验证：render 与 select 使用同一份列表，编号不会错位。
+     */
+    private List&lt;Option&gt; visibleOptions() {
+<span class="fc bfc" id="L194" title="All 2 branches covered.">        return options.stream().filter(o -&gt; !o.hidden()).toList();</span>
+    }
+
+    /**
+     * 主负责人：Yuhan。
+     * 做什么：解析结果：选中的项和别名参数。
+     * 对接／验证：仅供本类与 MenuTest 使用。
+     *
+     * @param option selected option
+     * @param argument text after an alias
+     */
+<span class="fc" id="L205">    record Selection(Option option, String argument) {</span>
+    }
+
+    /**
+     * 主负责人：Yuhan。
+     * 做什么：一直运行菜单直到用户选择 0。
+     * 对接／验证：子页面（浏览、我的卷轴、资料）直接调用；主菜单因每轮角色可能变化，由 ConsoleUi 每轮重新建菜单。
+     *
+     * @param io shared console helper
+     * @param prompt prompt text
+     * @param beforeEachRound printed before every menu display, e.g. the scroll list; may be {@code null}
+     */
+    public void loop(ConsoleIO io, String prompt, Runnable beforeEachRound) {
+<span class="fc" id="L218">        boolean again = true;</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">        while (again) {</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">            if (beforeEachRound != null) {</span>
+<span class="fc" id="L221">                beforeEachRound.run();</span>
+            }
+<span class="fc" id="L223">            again = runOnce(io, prompt);</span>
+        }
+<span class="fc" id="L225">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

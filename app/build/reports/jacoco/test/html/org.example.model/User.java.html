@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">app</a> &gt; <a href="index.source.html" class="el_package">org.example.model</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package org.example.model;
+
+public class User {
+
+    private final String idKey;
+    private final String username;
+    private final String passwordHash;
+    private final String fullName;
+    private final String email;
+    private final String phone;
+    private final UserRole role;
+
+    public User(
+            String idKey,
+            String username,
+            String passwordHash,
+            String fullName,
+            String email,
+            String phone,
+<span class="fc" id="L20">            UserRole role) {</span>
+
+<span class="fc" id="L22">        this.idKey = idKey;</span>
+<span class="fc" id="L23">        this.username = username;</span>
+<span class="fc" id="L24">        this.passwordHash = passwordHash;</span>
+<span class="fc" id="L25">        this.fullName = fullName;</span>
+<span class="fc" id="L26">        this.email = email;</span>
+<span class="fc" id="L27">        this.phone = phone;</span>
+<span class="fc" id="L28">        this.role = role;</span>
+<span class="fc" id="L29">    }</span>
+
+    public String getIdKey() {
+<span class="fc" id="L32">        return idKey;</span>
+    }
+
+    public String getUsername() {
+<span class="fc" id="L36">        return username;</span>
+    }
+
+    public String getPasswordHash() {
+<span class="fc" id="L40">        return passwordHash;</span>
+    }
+
+    public String getFullName() {
+<span class="fc" id="L44">        return fullName;</span>
+    }
+
+    public String getEmail() {
+<span class="fc" id="L48">        return email;</span>
+    }
+
+    public String getPhone() {
+<span class="fc" id="L52">        return phone;</span>
+    }
+
+    public UserRole getRole() {
+<span class="fc" id="L56">        return role;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

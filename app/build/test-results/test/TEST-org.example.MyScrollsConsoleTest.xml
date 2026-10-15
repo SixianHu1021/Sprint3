@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.MyScrollsConsoleTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-15T11:11:00.317Z" hostname="Macintosh-4.local" time="0.027">
+  <properties/>
+  <testcase name="otherUsersScrollsCannotBeChanged()" classname="org.example.MyScrollsConsoleTest" time="0.007"/>
+  <testcase name="listsOnlyOwnScrollsWithNumberedActions()" classname="org.example.MyScrollsConsoleTest" time="0.004"/>
+  <testcase name="renameAndReplaceThroughNumbers()" classname="org.example.MyScrollsConsoleTest" time="0.005"/>
+  <testcase name="guestsCannotOpenMyScrolls()" classname="org.example.MyScrollsConsoleTest" time="0.004"/>
+  <testcase name="deleteAsksForConfirmation()" classname="org.example.MyScrollsConsoleTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
