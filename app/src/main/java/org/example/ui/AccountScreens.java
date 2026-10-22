@@ -8,30 +8,52 @@ import org.example.service.AccountService;
 /**
  * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
  *   - 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
+ *   - 【PR s3-r4-profile-picture-screen】实现：Yuhan ｜ 审核：Henry（仅在资料菜单接入头像页面，不改其它方法）
  *
  * 【Sprint 2 · US03 #4 / US16 #51 / US12 #13】主负责人：Henry。
  * 做什么：账户相关的控制台页面：注册／首次管理员／管理员添加用户的资料表单（从 Sprint 1 ConsoleUi.createAccount 移来），
  * 以及新的“我的资料”页面（查看资料、修改姓名邮箱电话、修改密码）。
  * 对接／验证：所有输入通过 Yuhan 的 ConsoleIO（必填立即重问、密码隐藏）；业务规则全部在 AccountService，
  * 本类不重复写校验。Yuhan 在 R4 把 ConsoleUi 的 register/add-user/profile 菜单项接到这里。
+ *
+ * <p>【Sprint 3 · US19 #67 / US20 #68】主负责人：Yuhan（接线）。
+ * 做什么：“我的资料”菜单新增一个“Profile picture”项，进入 Yuhan 的 ProfilePictureScreen（上传／预览头像）。
+ * 为什么放在这里：资料入口是 Henry 的页面，但头像功能全部写在新文件 ProfilePictureScreen 里，
+ * 本文件只多一个菜单项、不改原有方法，避免多人反复改同一文件。pictureScreen 为 null 时不显示该项（Sprint 2 测试不受影响）。
  */
 public final class AccountScreens {
 
     private final AccountService accounts;
     private final ConsoleIO io;
+    private final ProfilePictureScreen pictureScreen;
 
     /**
      * 【PR s2-r2-account-screens】实现：Henry ｜ 审核：Yuhan
      * 主负责人：Henry。
-     * 做什么：保存账户服务和共用输入输出。
-     * 对接／验证：ConsoleUi 构造时创建一次。
+     * 做什么：保存账户服务和共用输入输出（Sprint 2 构造方法，不接入头像页面）。
+     * 对接／验证：ProfileConsoleTest 等 Sprint 2 测试继续使用这个构造方法，资料菜单不含头像项。
      *
      * @param accounts account service
      * @param io shared console helper
      */
     public AccountScreens(AccountService accounts, ConsoleIO io) {
+        this(accounts, io, null);
+    }
+
+    /**
+     * 【PR s3-r4-profile-picture-screen】实现：Yuhan ｜ 审核：Henry
+     * 主负责人：Yuhan。
+     * 做什么：完整构造方法，额外接入头像页面；pictureScreen 非空时资料菜单出现“Profile picture”项。
+     * 对接／验证：ConsoleUi 在 R4 用这个构造方法创建 AccountScreens，并把 ProfilePictureScreen 传进来。
+     *
+     * @param accounts account service
+     * @param io shared console helper
+     * @param pictureScreen profile picture screen, or {@code null} to hide the option
+     */
+    public AccountScreens(AccountService accounts, ConsoleIO io, ProfilePictureScreen pictureScreen) {
         this.accounts = accounts;
         this.io = io;
+        this.pictureScreen = pictureScreen;
     }
 
     /**
@@ -94,6 +116,10 @@ public final class AccountScreens {
         Menu menu = new Menu("Profile menu:", "Back", "back")
                 .option("Edit full name, email and phone", "edit", a -> editDetails())
                 .option("Change password", "password", a -> changePassword());
+        // 【Sprint 3 · US19 #67 / US20 #68】Yuhan 接线：有头像页面时，资料菜单多一个“Profile picture”项。
+        if (pictureScreen != null) {
+            menu.option("Profile picture (upload / preview)", "picture", a -> pictureScreen.show());
+        }
         menu.loop(io, "Profile> ", this::showProfile);
     }
 
@@ -112,6 +138,9 @@ public final class AccountScreens {
         io.info("  Email:     " + user.getEmail());
         io.info("  Phone:     " + user.getPhone());
         io.info("  Role:      " + user.getRole());
+        // 【Sprint 3 · US20 #68】Yuhan 接线：在资料页显示是否已添加头像（added / not added）。
+        io.info("  Picture:   " + (user.hasProfilePicture()
+                ? "added (" + user.getProfilePictureFormat() + ")" : "not added"));
     }
 
     /**

@@ -10,6 +10,8 @@ import org.example.model.User;
 import org.example.model.UserRole;
 import org.example.service.AccountService;
 import org.example.service.FileOpener;
+import org.example.service.ProfilePictureService;
+import org.example.service.ProfilePictureViewer;
 import org.example.service.ScrollEditService;
 import org.example.service.ScrollQueryService;
 import org.example.service.ScrollService;
@@ -79,6 +81,9 @@ public final class ConsoleUi {
      * 做什么：完整构造方法，额外接收 “用默认应用打开” 的方式；App 传入 FileOpener.desktop()，
      * 其他构造方法默认 unavailable()，因此测试永远不会真的弹出窗口。
      *
+     * <p>【Sprint 3 · US19 #67 / US20 #68】这个构造方法不接入头像功能（pictures/picViewer 为 null，资料里不出现头像项）；
+     * 需要头像功能的（App 以及集成测试）请使用下面接收 ProfilePictureService / ProfilePictureViewer 的构造方法。
+     *
      * @param accounts account management service
      * @param scrolls scroll management service
      * @param edits scroll editing service, or {@code null} if unavailable
@@ -87,10 +92,32 @@ public final class ConsoleUi {
      */
     public ConsoleUi(AccountService accounts, ScrollService scrolls, ScrollEditService edits, ConsoleIO io,
                      FileOpener opener) {
+        this(accounts, scrolls, edits, io, opener, null, null);
+    }
+
+    /**
+     * 【PR s3-r4-profile-picture-screen】实现：Yuhan ｜ 审核：Sixian
+     * 【Sprint 3 · US19 #67 / US20 #68】主负责人：Yuhan（接线）。
+     * 做什么：完整构造方法，额外接收头像服务和头像查看器，创建 ProfilePictureScreen 并接入 Henry 的资料菜单。
+     * 对接／验证：App 传入与其他服务共用同一个 UserRepository 的 ProfilePictureService，以及真实 FileOpener 的
+     * ProfilePictureViewer；pictures 为 null 时资料里不出现头像项（兼容 Sprint 1/2 测试）。
+     *
+     * @param accounts account management service
+     * @param scrolls scroll management service
+     * @param edits scroll editing service, or {@code null} if unavailable
+     * @param io shared console helper
+     * @param opener how this machine opens files
+     * @param pictures profile picture service, or {@code null} to disable the feature
+     * @param picViewer profile picture viewer, or {@code null} to disable opening
+     */
+    public ConsoleUi(AccountService accounts, ScrollService scrolls, ScrollEditService edits, ConsoleIO io,
+                     FileOpener opener, ProfilePictureService pictures, ProfilePictureViewer picViewer) {
         this.accounts = accounts;
         this.scrolls = scrolls;
         this.io = io;
-        this.accountScreens = new AccountScreens(accounts, io);
+        ProfilePictureScreen pictureScreen = pictures == null ? null
+                : new ProfilePictureScreen(accounts, pictures, picViewer, io);
+        this.accountScreens = new AccountScreens(accounts, io, pictureScreen);
         this.browseScreen = new BrowseScreen(scrolls, new ScrollQueryService(scrolls), accounts, io,
                 new ScrollViewer(scrolls, accounts, opener));
         this.myScrollsScreen = edits == null ? null : new MyScrollsScreen(edits, io);
@@ -104,7 +131,7 @@ public final class ConsoleUi {
      * 对接／验证：任何无效输入只显示 “Error: …” 并重新显示当前菜单，不退出程序（US13/US14）。
      */
     public void run() {
-        io.info("Virtual Scroll Access System — Sprint 2");
+        io.info("Virtual Scroll Access System — Sprint 3");
 
         try {
             while (accounts.needsBootstrap()) {

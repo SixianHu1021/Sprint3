@@ -1,0 +1,517 @@
+% ---------------------------------------------------------------------------
+% Standalone version: uses the standard "article" class so it compiles on
+% Overleaf without the Sydney "assignment.cls" / "common.sty" template files.
+% minted has been replaced by listings (no shell-escape required).
+% ---------------------------------------------------------------------------
+\documentclass[a4paper,11pt]{article}
+\def\coursecode{SOFT2412/COMP9412}
+\def\coursename{Agile Software Development Practices}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{rotating}
+\usepackage{lscape}
+\usepackage{listings}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{geometry}
+\usepackage{parskip}
+\usepackage{setspace}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{caption}
+\geometry{a4paper,margin=2.5cm}
+
+\setstretch{0.9}
+\setlist[itemize]{itemsep=0pt,parsep=0pt,topsep=0pt}
+
+% ---------------------------------------------------------------------------
+% Image placeholder: use \placeholder{width}{caption text} where a screenshot
+% is still to be captured during the sprint. Replace with \includegraphics once
+% the evidence image file is available.
+% ---------------------------------------------------------------------------
+\newcommand{\placeholder}[2]{%
+  \fbox{\begin{minipage}[c][0.18\textheight][c]{#1}%
+    \centering\ttfamily\small [PLACEHOLDER IMAGE]\\[4pt]#2%
+  \end{minipage}}%
+}
+
+\newtcolorbox{faqbox}{enhanced,colback=white,colframe=black,arc=0pt,outer arc=0pt,boxrule=1pt,left=10pt,right=10pt,top=10pt,bottom=10pt}
+\newlist{myitemize}{itemize}{1}
+\setlist[myitemize]{label=--,leftmargin=*}
+
+\fancyhf{}
+\fancyfoot[R]{Page \thepage\ }
+\pagestyle{fancy}
+\renewcommand{\arraystretch}{1.5}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{\coursename\\[4pt]\large Sprint 3 Report --- Team T16-2}
+\author{Sixian Hu \and Henry Wang \and Yuhan Pan \and Stella Xu}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\noindent\textbf{Unit of Study:} SOFT2412 \\
+\noindent\textbf{Sprint Number: 3} \\
+\noindent\textbf{Tutorial time: Thursday, 12:00 pm--2:00 pm } \\
+\noindent\textbf{Tutor name: Behroz Newaz Khan}
+
+\noindent\textbf{DECLARATION}
+
+We, the undersigned, declare that the work contained in this assignment/project is our own work and has not been copied from other sources or been previously submitted for award or assessment. We understand that failure to comply with the Student Plagiarism: Coursework Policy and Procedure can lead to severe penalties as outlined under Chapter 8 of the University of Sydney By-Law 1999 (as amended). These penalties may be imposed in cases where any significant portion of my submitted work has been copied without proper acknowledgment from other sources, including published works, the internet, existing programs, the work of other students, or work previously submitted for other awards or assessments. We realise that we may be asked to identify those portions of the work contributed by each of us and required to demonstrate our individual knowledge of the relevant material by answering oral questions or by undertaking supplementary work, either written or in the laboratory, in order to arrive at the final assessment mark.
+
+\vspace{1em}
+\textbf{Project Team Members}
+
+\begin{longtable}{|p{5cm}|p{4cm}|p{5cm}|}
+\hline
+\textbf{Student Name} & \textbf{Student ID} & \textbf{Signature} \\
+\hline
+Sixian Hu & 550251602 & Sixian Hu\\
+\hline
+Henry Wang & 550250247 & Henry Wang \\
+\hline
+Yuhan Pan & 550194491 & Yuhan Pan \\
+\hline
+Stella Xu & 550665784 & Stella Xu \\
+\hline
+\end{longtable}
+
+\newpage
+\section{Project Overview}
+
+\subsection{Project Goals and Objectives}
+
+The Virtual Scroll Access System (VSAS) is a Java-based console application that lets users register, authenticate, manage their profiles, and upload, browse, preview, download, edit and delete digital scrolls. The project is developed iteratively using Scrum, with GitHub for collaboration, Gradle and JUnit for build and test, and Jenkins for continuous integration.
+
+By the end of Sprint 1, the team completed seven user stories (26 story points) covering authentication and the core scroll workflow. Sprint 2 added ten stories (38 points) covering self-service profile and scroll management, filtering, sorting, format-aware previews, admin statistics, and a numbered, validated console with hidden passwords.
+
+\textbf{Sprint 3} focuses on personalising the account. The team selected two user stories, totalling 13 story points: US19 (upload a profile picture) and US20 (preview the profile picture like an image scroll). These build directly on the Sprint 2 account model and the image preview / open-in-default-application features, giving each user a recognisable, verifiable avatar while keeping guests restricted and older accounts fully compatible.
+
+\subsubsection*{Working Application Evidence}
+
+The following screenshots demonstrate the Sprint 3 console workflows: uploading a profile picture with JPG/PNG validation, rejecting a disguised (fake) image, previewing the picture with its format, size and pixel dimensions, and opening it in the default application.
+
+\begin{figure}[H]
+    \centering
+    \placeholder{\textwidth}{Member uploads a valid PNG profile picture from My profile; status becomes ``added (png)''.}
+    \captionsetup{justification=centering}
+    \caption{US19 --- uploading a valid profile picture. [Capture during the sprint.]}
+    \label{fig:sprint3-upload}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \placeholder{\textwidth}{A text file renamed to \texttt{.png} is rejected as ``not a real JPG or PNG image''; an oversized file and a non-image extension are also rejected.}
+    \captionsetup{justification=centering}
+    \caption{US19 --- immediate validation by extension, content and size. [Capture during the sprint.]}
+    \label{fig:sprint3-validation}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \placeholder{\textwidth}{Preview shows Format, Size and ``Image size: W x H pixels''; the picture opens in the default application.}
+    \captionsetup{justification=centering}
+    \caption{US20 --- previewing and opening the profile picture. [Capture during the sprint.]}
+    \label{fig:sprint3-preview}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \placeholder{\textwidth}{Successful Jenkins build for the Sprint 3 commit (Checkstyle, coverage gate, archived \texttt{app.zip}).}
+    \captionsetup{justification=centering}
+    \caption{Jenkins build \#\underline{\hspace{1.2cm}} for Sprint 3 at commit \texttt{\underline{\hspace{2cm}}}. [Fill in after the team-repository run.]}
+    \label{fig:sprint3-jenkins}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \placeholder{\textwidth}{JUnit results: 235 tests passed, 0 failures, 0 skipped.}
+    \captionsetup{justification=centering}
+    \caption{Test results: all 235 tests passed (211 from Sprint 2 + 24 new). [Capture from Jenkins/local run.]}
+    \label{fig:sprint3-tests}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \placeholder{\textwidth}{JaCoCo coverage report for Sprint 3.}
+    \captionsetup{justification=centering}
+    \caption{JaCoCo coverage: approximately 96\% line and 97\% instruction coverage. [Capture from the run.]}
+    \label{fig:sprint3-jacoco}
+\end{figure}
+
+\subsection{Sprint Goals}
+
+The goal of Sprint 3 was to make each account more personal and recognisable by letting a logged-in user add and preview a profile picture, while preserving the security and usability established in earlier sprints. Concretely, a user can upload a JPG or PNG from the ``My profile'' screen, the picture is validated by both its extension and its real content, it is stored with the account and persists across sessions, and it can be previewed and opened exactly like an image scroll. Guests cannot upload or preview pictures, and accounts created before Sprint 3 continue to load without a picture.
+
+The team selected the two outstanding Product Backlog stories (US19, US20), which were the only items remaining after Sprint 2. Although small in number, they touch the core account model, so the team prioritised backward compatibility and reuse of the existing image-preview infrastructure.
+
+\subsection{User Stories}
+
+During Sprint 3 the team selected the two remaining Product Backlog stories. Both concern the user's profile picture and are closely related: US19 handles uploading and storage, and US20 handles previewing and opening.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|c|X|c|c|c|}
+\hline
+\textbf{ID} & \textbf{User Story / Description} & \textbf{Priority} & \textbf{SP} & \textbf{Status} \\
+\hline
+US19 & As a registered user, I want to upload a profile picture from my profile, so that my account is more personal and recognisable. & High & 8 & Done \\
+\hline
+US20 & As a logged-in user, I want to preview my profile picture in the same way as an image scroll, so that I can check the picture I have uploaded. & Medium & 5 & Done \\
+\hline
+\textbf{Total} & \textbf{2 User Stories} & -- & \textbf{13} & \textbf{Done} \\
+\hline
+\end{tabularx}
+\caption{User stories selected and completed in Sprint 3.}
+\label{tab:sprint3-stories}
+\end{table}
+
+US19 was estimated at 8 points because it spans several layers: an optional field on the immutable \texttt{User} model, Base64 persistence with backward compatibility in \texttt{FileUserRepository}, a validation service that checks extension, real content and size, and a new console screen, all with JUnit tests. US20 was estimated at 5 points because it reuses the Sprint 2 image preview rendering and the \texttt{FileOpener} abstraction, adding a renderer, a viewer and the profile-picture menu.
+
+\vspace{0.5cm}
+\noindent\textbf{Changes to User Stories During Sprint 3}\par
+
+No scope changes were required during the sprint. The acceptance criteria were refined with two clarifications recorded in \texttt{docs/sprint-3/acceptance-criteria.md}: a 5~MiB size limit for pictures (half the 10~MiB scroll limit) and normalising JPEG to the \texttt{jpg} label for a consistent extension when opening. [Confirm with the tutor at the Sprint Review and record the response.]
+
+\newpage
+\section{Scrum Artefacts and Methodologies}
+
+\subsection{Sprint Planning}
+
+\noindent\textbf{Sprint Scope and Work Allocation}\par
+Sprint 3 planning used the velocity observed in Sprints 1 and 2 (26 and 38 points) together with the small remaining backlog. Because only two stories remained, the team split them across layers so that all four members, including the Product Owner and Scrum Master, contributed code, with the two developers taking a slightly larger coding share. The agreed allocation is summarised in Table~\ref{tab:sprint3-allocation}.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|l|X|c|}
+\hline
+\textbf{Member} & \textbf{Assigned work (story / layer)} & \textbf{SP (approx.)} \\
+\hline
+Henry (SM) & US19 --- account model and Base64 storage; backward compatibility; CI gate & 4 \\
+\hline
+Stella (PO) & US19 --- validation service (extension + content + size + replace); README & 4 \\
+\hline
+Yuhan & US19 + US20 --- profile picture screen; wiring into My profile, ConsoleUi and App & 5 \\
+\hline
+Sixian & US20 --- preview renderer and viewer (reusing image preview and FileOpener) & 5 \\
+\hline
+\end{tabularx}
+\caption{Sprint 3 work allocation among team members.}
+\label{tab:sprint3-allocation}
+\end{table}
+
+\noindent\textbf{Technical Planning}\par
+The team kept the Sprint 1/2 layering (model, repository, security, service, UI) and added new service and screen classes per feature, so that members work in parallel with almost no shared-file edits. The only shared files touched were the account model and storage (Henry), the extracted image-preview helper (Sixian, the original author of \texttt{ScrollPreviewRenderer}), and the wiring files \texttt{AccountScreens}, \texttt{ConsoleUi} and \texttt{App} (Yuhan). The dependency order was planned explicitly: the model/storage PR must merge first, the validation and preview PRs then proceed in parallel, and the UI wiring PR merges last.
+
+\noindent\textbf{Sprint Backlog Management}\par
+The Sprint Backlog was managed through GitHub Projects using four states: Todo, In Progress, Review and Done. The planning meeting minutes and attendance evidence are provided in Appendix~\ref{app:sprint3-planning}.
+
+\subsection{Daily Stand-ups}
+
+During Sprint 3 the team held two online stand-ups. Table~\ref{tab:sprint3-standups} summarises the key updates. Meeting minutes and attendance evidence are stored under \texttt{docs/meeting-notes}. [Fill in the exact dates, durations and content after the meetings.]
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{0.15\textwidth}|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
+\hline
+\multicolumn{4}{|c|}{Sprint 3} \\
+\hline
+\textbf{Stand-up} & \textbf{Progress} & \textbf{Blockers} & \textbf{Actions} \\
+\hline
+Stand-up 1\newline \underline{\hspace{1.8cm}} Oct 2026 & The account model and Base64 storage (US19) were complete and merged; validation and preview services were in progress. & [Record any blockers.] & Complete the validation and preview services; prepare the UI wiring. \\
+\hline
+Stand-up 2\newline \underline{\hspace{1.8cm}} Oct 2026 & Validation and preview services merged; UI wiring (profile picture screen) in progress and nearly ready for integration. & [Record any blockers.] & Finish integration, run full build and Jenkins, prepare the demo. \\
+\hline
+\end{tabularx}
+\caption{Summary of Sprint 3 stand-up meetings. [Dates and content to be finalised.]}
+\label{tab:sprint3-standups}
+\end{table}
+
+\subsection{Retrospective}
+
+The Sprint 3 retrospective was held after the Week 12 demonstration. [Record the date, duration and attendance.] The team reviewed collaboration, the layer-based split of the two stories, and the reuse of existing preview infrastructure.
+
+\subsubsection*{What Went Well}
+Splitting the two stories by layer let all four members contribute code in parallel with no merge conflicts, and reusing the Sprint 2 image preview and \texttt{FileOpener} avoided duplicated logic. Keeping the account model backward compatible meant no Sprint 1/2 test needed changing.
+
+\subsubsection*{What Could Be Improved}
+[To be completed after the retrospective, e.g. earlier preparation of real sample images, or clearer agreement on the size limit before implementation.]
+
+\subsubsection*{Improvement Actions}
+[To be completed with owners during the retrospective.]
+
+\subsection{Use of Scrum Artefacts}
+
+\subsubsection*{Product Backlog}
+After Sprint 2, the Product Backlog contained the two remaining stories, US19 and US20, both prioritised for Sprint 3. The board had no items left in other sprints' backlogs.
+
+\begin{figure}[H]
+    \centering
+    \placeholder{\textwidth}{Product Backlog / Sprint Board showing US19 and US20 as the Sprint 3 scope.}
+    \captionsetup{justification=centering}
+    \caption{The Product Backlog and Sprint 3 board. [Capture at planning.]}
+    \label{fig:sprint3-backlog}
+\end{figure}
+
+\subsubsection*{Sprint Backlog and Board}
+The two stories were moved through Todo, In Progress, Review and Done on the GitHub Sprint Board. [Capture start-of-sprint and end-of-sprint board screenshots.]
+
+\subsubsection*{User Stories and Acceptance Criteria}
+Each story is a GitHub Issue in the \textit{As a..., I want..., so that...} format with acceptance criteria and an implementation task checklist. A full criterion-to-code/test mapping is provided in \texttt{docs/sprint-3/acceptance-criteria.md}.
+
+\begin{figure}[H]
+    \centering
+    \placeholder{0.95\textwidth}{US19 GitHub Issue showing the user story, acceptance criteria and task checklist.}
+    \captionsetup{justification=centering}
+    \caption{US19 (\#67) GitHub Issue. [Capture from GitHub.]}
+    \label{fig:sprint3-us19-issue}
+\end{figure}
+
+\subsubsection*{Increment}
+The Sprint 3 increment is the integrated VSAS console application with profile-picture upload, preview and open-in-default-application, preserved under the \texttt{sprint-3} tag.
+
+\newpage
+\section{Application Development}
+
+\subsection{Collaborative Coding}
+
+\noindent\textbf{Version Control and Branching Strategy}\par
+The team continued to use feature branches and pull requests merged into \texttt{main} after peer review. Sprint 3 used four branches, one per PR, named to reflect the stage and feature:
+\texttt{s3-r1-profile-picture-model}, \texttt{s3-r2-profile-picture-service}, \texttt{s3-r3-profile-picture-preview} and \texttt{s3-r4-profile-picture-screen}. Henry (Scrum Master) coordinated integration and merges; his own PR was merged by Stella.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{|c|l|l|l|X|}
+\hline
+\textbf{PR} & \textbf{Branch} & \textbf{Author} & \textbf{Reviewer} & \textbf{Content} \\
+\hline
+P1 & s3-r1-profile-picture-model & Henry & Stella & \texttt{User} picture fields and \texttt{withProfilePicture}; \texttt{FileUserRepository} Base64 persistence and backward compatibility \\
+\hline
+P2 & s3-r2-profile-picture-service & Stella & Henry & \texttt{ProfilePictureService}: \texttt{checkSource} and \texttt{setProfilePicture} (extension + content + size + login + replace) \\
+\hline
+P3 & s3-r3-profile-picture-preview & Sixian & Stella & \texttt{ProfilePictureRenderer}, \texttt{ProfilePictureViewer}; extracted \texttt{ScrollPreviewRenderer.appendImageDetails} \\
+\hline
+P4 & s3-r4-profile-picture-screen & Yuhan & Sixian/Henry & \texttt{ProfilePictureScreen}; wiring into \texttt{AccountScreens}, \texttt{ConsoleUi}, \texttt{App} \\
+\hline
+\end{tabularx}
+\caption{Sprint 3 pull requests, authors and reviewers. [Add PR links and Jenkins build numbers after the runs.]}
+\label{tab:sprint3-prs}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \placeholder{\textwidth}{The four merged Sprint 3 pull requests.}
+    \captionsetup{justification=centering}
+    \caption{Merged Sprint 3 pull requests. [Capture from GitHub.]}
+    \label{fig:sprint3-merged-prs}
+\end{figure}
+
+\medskip
+\noindent\textbf{Branch Integration and Merge Conflicts}\par
+The dependency order prevented conflicts: P1 (model/storage) merged first; P2 (validation) and P3 (preview) then proceeded in parallel on different files; P4 (UI wiring) merged last. [Record whether any conflicts actually occurred and how they were resolved; if none, state so.]
+
+\medskip
+\noindent\textbf{Alignment with User Requirements}\par
+Pull request descriptions linked work to Issues \#67 and \#68 with \texttt{Relates to}. Implementation proceeded from the persistence and service layers to console interaction, and automated tests covered validation, persistence, preview and the console workflow.
+
+\medskip
+\noindent\textbf{Team Collaboration}\par
+Henry implemented the profile-picture fields on the account model and the Base64 persistence; Stella implemented the validation service; Sixian implemented the preview renderer and viewer, reusing the image preview and \texttt{FileOpener}; Yuhan implemented the profile-picture screen and wired it into the numbered console. Dependencies were handled through staged integration and peer review.
+
+\subsection{CI (Continuous Integration) Tools and Structure Management}
+
+\subsubsection*{Build, Testing and Coverage}
+Gradle (with the wrapper, JDK 21) manages the build, tests and distribution. JUnit 5 tests cover the account model and storage, the validation service, the preview renderer and viewer, and the profile-picture console screen. A local \texttt{./gradlew clean build} passed Checkstyle, the 75\% line-coverage gate and all \textbf{235 tests} (211 from Sprint 2 + 24 new), with approximately 96\% line and 97\% instruction coverage (see \texttt{docs/sprint-3/validation.md}). [Replace with the Jenkins figures for the tagged commit.]
+
+\subsubsection*{Jenkins Continuous Integration}
+Jenkins runs in Docker, polls \texttt{main}, and executes the pipeline defined in the repository \texttt{Jenkinsfile}: Checkout, Prepare, Build, Test (JUnit results), Code Quality (Checkstyle), Coverage (JaCoCo report and the coverage-verification gate) and Package (JAR and \texttt{distZip}). JaCoCo reports and the application archive are stored as build artifacts.
+
+\begin{figure}[H]
+    \centering
+    \placeholder{\textwidth}{Jenkins Stage View for the Sprint 3 build, including Code Quality and Coverage stages.}
+    \captionsetup{justification=centering}
+    \caption{Jenkins Stage View for Sprint 3. [Capture after the run.]}
+    \label{fig:sprint3-stageview}
+\end{figure}
+
+\subsubsection*{Application Structure}
+The Sprint 3 additions follow the existing packages: the \texttt{model}/\texttt{repository} changes add an optional picture to the account and persist it as Base64; the \texttt{service} package gains \texttt{ProfilePictureService} (validation and storage), \texttt{ProfilePictureRenderer} (reusing the image preview) and \texttt{ProfilePictureViewer} (reusing \texttt{FileOpener}); and the \texttt{ui} package gains \texttt{ProfilePictureScreen}, reached from \texttt{AccountScreens}. Figure~\ref{fig:sprint3-uml} shows the Sprint 3 additions; the full architecture is described in \texttt{docs/sprint-3/architecture.md}.
+
+\begin{figure}[H]
+    \centering
+    \placeholder{\textwidth}{Simplified UML of the Sprint 3 additions (profile picture service, renderer, viewer and screen).}
+    \captionsetup{justification=centering}
+    \caption{Simplified UML of the Sprint 3 additions. [Render from the architecture diagram.]}
+    \label{fig:sprint3-uml}
+\end{figure}
+
+\subsection{Functional and Non-functional Aspects}
+
+\subsubsection*{Functional Requirements}
+Sprint 3 delivered two user stories. US19 lets a logged-in user upload a JPG or PNG profile picture from ``My profile''; the picture is validated by extension, real content (magic number) and size, replaces any previous picture, and persists across sessions. US20 lets the user see whether a picture has been added, preview it with its format, size and pixel dimensions (the same as an image scroll), and open it in the default application. Guests cannot upload or preview pictures, and accounts created before Sprint 3 load without a picture.
+
+\subsubsection*{Non-functional Requirements}
+\noindent\textbf{Security and robustness.} Validation rejects non-image types, disguised (renamed) files and oversized files, with immediate, consistent \texttt{Error:} feedback and the option to cancel. Opening a picture on a machine without a desktop reports the reason and the program continues. Authorisation is enforced in the service layer, so guests cannot upload or preview.
+
+\noindent\textbf{Reliability and compatibility.} The account model stays immutable and the picture is optional; snapshots written before Sprint 3 remain readable, and no Sprint 1/2 test required changes. Pictures are stored as Base64 inside the user snapshot and survive restarts.
+
+\noindent\textbf{Maintainability.} New functionality lives in new service and screen classes; the only shared edits are the account model/storage, the extracted image helper (same author) and the wiring files. Previewing reuses the image rendering and opening reuses \texttt{FileOpener}, avoiding duplicated logic.
+
+\subsection{Code Quality}
+
+\subsubsection*{Coding Standards and Comments}
+The team kept descriptive names, package separation and per-method ownership comments (\texttt{implementer / reviewer / PR}) consistent with Sprints 1 and 2. Services centralise validation and authorisation; screens only collect input and display results.
+
+\subsubsection*{Peer Review}
+Each PR was reviewed by the named reviewer before merging (Table~\ref{tab:sprint3-prs}). [Add a representative review screenshot, e.g. a requested change and its resolution, once available.]
+
+\begin{figure}[H]
+    \centering
+    \placeholder{\textwidth}{Peer review of a Sprint 3 PR, showing comments, corrective commits and approval.}
+    \captionsetup{justification=centering}
+    \caption{Peer review of a Sprint 3 pull request. [Capture from GitHub.]}
+    \label{fig:sprint3-pr-review}
+\end{figure}
+
+\subsubsection*{Linting and Static Analysis}
+Checkstyle ran as part of the Gradle build with the same configuration as earlier sprints; the Sprint 3 code passed with zero violations. [Capture the Checkstyle report counts.]
+
+\newpage
+\section{Group Contribution}
+
+\subsection{Team Organisation and Roles}
+The team retained its Scrum roles: Product Owner (Stella Xu), Scrum Master (Henry Wang) and all four members as developers. As in earlier sprints, the Product Owner and Scrum Master combined their Scrum responsibilities with implementation work; in Sprint 3 Henry implemented the account model and storage and Stella implemented the validation service, while the two developers (Yuhan, Sixian) took a slightly larger coding share on the UI and preview.
+
+\subsection{Group Communication and Collaboration}
+The team used Zoom for planning and stand-ups and WeChat for day-to-day coordination. GitHub Issues, the project board and pull request discussions recorded requirements, ownership and technical decisions. Meeting minutes are stored in the repository and reproduced in the appendices.
+
+\subsubsection*{Sprint and Demo Participation}
+All four members participated in planning, both stand-ups, the retrospective and the Week 12 demonstration. Each member demonstrated the part for which they were primarily responsible: Henry (model and persistence, backward compatibility), Stella (validation), Sixian (preview and open), and Yuhan (the profile picture screen and integration). [Confirm attendance with screenshots.]
+
+\subsection{Individual Contributions and Statement}
+
+\begin{table}[H]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{0.18\textwidth}|>{\raggedright\arraybackslash}X|}
+        \hline
+        \textbf{Member} & \textbf{Contribution} \\
+        \hline
+        Henry Wang & As Scrum Master, implemented the optional profile-picture fields on the \texttt{User} model and the Base64 persistence with backward compatibility in \texttt{FileUserRepository}, with tests. Coordinated integration and merges, maintained Jenkins and the coverage gate, and prepared meeting records. \\
+        \hline
+        Stella Xu & As Product Owner, implemented the \texttt{ProfilePictureService} validation and storage (extension, real content, size, replacement, login), with tests. Owned the backlog and acceptance criteria, performed final acceptance, and updated the README. \\
+        \hline
+        Yuhan Pan & Implemented the \texttt{ProfilePictureScreen} and wired the profile-picture feature into \texttt{AccountScreens}, \texttt{ConsoleUi} and \texttt{App}, with end-to-end console tests. Participated in review and demonstrated the integrated workflow. \\
+        \hline
+        Sixian Hu & Implemented the \texttt{ProfilePictureRenderer} and \texttt{ProfilePictureViewer}, reusing the image preview and \texttt{FileOpener}, and extracted the shared image-detail helper, with tests. Participated in review and demonstrated preview and open-in-app. \\
+        \hline
+    \end{tabularx}
+    \caption{Individual contributions during Sprint 3.}
+    \label{tab:sprint3-contributions}
+\end{table}
+
+\subsubsection*{Contribution Statement}
+All four members made substantial contributions to Sprint 3, and the team considers their overall contributions broadly balanced. Responsibilities differed, but each member contributed implementation work, tests, review and collaborative activities. This statement reflects Sprint 3 and consolidates the final contribution assessment across the three sprints. [Adjust if the team agrees on a different final statement.]
+
+\clearpage
+\appendix
+\section{Sprint 3 Stand-up Records}
+\label{app:standup-records}
+
+\subsection{Stand-up 1}
+\noindent
+\textbf{Time and duration:} \underline{\hspace{4cm}}\\
+\textbf{Meeting type:} Online via Zoom\\
+\textbf{Attendees:} Qinghan (Henry) Wang, Yuhan Pan, Sixian Hu, Stella Xu\\
+\textbf{Sprint:} Sprint 3
+
+[Record progress, blockers and upcoming work. Attach the attendance screenshot.]
+
+\begin{figure}[H]
+    \centering
+    \placeholder{0.65\textwidth}{Attendance and meeting time for Sprint 3 Stand-up 1.}
+    \caption{Sprint 3 Stand-up 1 attendance. [Capture from Zoom.]}
+    \label{fig:sprint3-standup1}
+\end{figure}
+
+\subsection{Stand-up 2}
+\noindent
+\textbf{Time and duration:} \underline{\hspace{4cm}}\\
+\textbf{Meeting type:} Online via Zoom\\
+\textbf{Attendees:} Qinghan (Henry) Wang, Yuhan Pan, Stella Xu, Sixian Hu\\
+\textbf{Sprint:} Sprint 3
+
+[Record progress, blockers and upcoming work. Attach the attendance screenshot.]
+
+\begin{figure}[H]
+    \centering
+    \placeholder{0.65\textwidth}{Attendance and meeting time for Sprint 3 Stand-up 2.}
+    \caption{Sprint 3 Stand-up 2 attendance. [Capture from Zoom.]}
+    \label{fig:sprint3-standup2}
+\end{figure}
+
+\clearpage
+\section{Sprint 3 Planning Meeting}
+\label{app:sprint3-planning}
+
+\noindent
+\textbf{Date:} \underline{\hspace{3cm}} (Sprint 3 planning)\\
+\textbf{Time and duration:} \underline{\hspace{4cm}}\\
+\textbf{Meeting type:} Online via Zoom\\
+\textbf{Attendees:} Stella Xu, Qinghan (Henry) Wang, Yuhan Pan, Sixian Hu\\
+\textbf{Sprint:} Sprint 3
+
+\subsubsection*{Key Decisions}
+\begin{enumerate}
+    \item \textbf{Role allocation:} the team kept its Scrum roles.
+    \item \textbf{Scope:} US19 and US20 selected (13 points); split by layer so all four members write code.
+    \item \textbf{Estimates:} US19 = 8 (multi-layer, backward compatibility), US20 = 5 (reuses image preview and FileOpener).
+    \item \textbf{Integration order:} model/storage first, then validation and preview in parallel, then UI wiring.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \placeholder{0.65\textwidth}{Attendance and meeting time for the Sprint 3 planning meeting.}
+    \caption{Sprint 3 planning attendance. [Capture from Zoom.]}
+    \label{fig:sprint3-planning-attendance}
+\end{figure}
+
+\clearpage
+\section{Sprint 3 Retrospective Meeting}
+\label{app:sprint3-retrospective}
+
+\noindent
+\textbf{Date:} \underline{\hspace{3cm}}\\
+\textbf{Time and duration:} \underline{\hspace{4cm}}\\
+\textbf{Attendees:} Qinghan (Henry) Wang, Yuhan Pan, Stella Xu, Sixian Hu\\
+\textbf{Sprint:} Sprint 3
+
+\subsubsection*{What Went Well}
+[To be completed, e.g. layer-based split enabled parallel work with no conflicts; reuse of image preview and FileOpener; backward compatibility avoided changing earlier tests.]
+
+\subsubsection*{What Could Be Improved}
+[To be completed.]
+
+\subsubsection*{Proposed Improvement Actions}
+[To be completed with owners.]
+
+\end{document}

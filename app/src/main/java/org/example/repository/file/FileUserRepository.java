@@ -2,6 +2,7 @@ package org.example.repository.file;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import org.example.repository.UserRepository;
 
 /**
  * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
+ *   - 【PR s3-r1-profile-picture-model】实现：Henry ｜ 审核：Stella（头像的 Base64 持久化与向后兼容）
  *   - 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
  *   - Sprint 1 原作者：Henry（未标 PR 的方法本轮不改）
  *
@@ -39,10 +41,15 @@ public final class FileUserRepository implements UserRepository {
             }
             for (int i = 0; i < count; i++) {
                 String p = i + ".";
+                // 【PR s3-r1-profile-picture-model】实现：Henry ｜ 审核：Stella
+                // 【Sprint 3 · US19 #67】旧快照没有 picture/picformat 字段，缺省为“没有头像”，因此老账户照常读取。
+                byte[] picture = decodePicture(data.getProperty(p + "picture"));
+                String picFormat = data.getProperty(p + "picformat", User.NO_PICTURE);
                 User user = new User(data.getProperty(p + "id"), data.getProperty(p + "username"),
                         data.getProperty(p + "hash"), data.getProperty(p + "name"),
                         data.getProperty(p + "email"), data.getProperty(p + "phone"),
-                        UserRole.valueOf(data.getProperty(p + "role")));
+                        UserRole.valueOf(data.getProperty(p + "role")),
+                        picture, picFormat);
                 if (existsByIdKey(user.getIdKey()) || existsByUsername(user.getUsername())) {
                     throw new IllegalArgumentException("Duplicate user in snapshot");
                 }
@@ -93,8 +100,31 @@ public final class FileUserRepository implements UserRepository {
             data.setProperty(p + "email", user.getEmail());
             data.setProperty(p + "phone", user.getPhone());
             data.setProperty(p + "role", user.getRole().name());
+            // 【PR s3-r1-profile-picture-model】实现：Henry ｜ 审核：Stella
+            // 【Sprint 3 · US19 #67】头像是二进制，用 Base64 存进 properties；没有头像就不写这两项，保持快照干净。
+            if (user.hasProfilePicture()) {
+                data.setProperty(p + "picture", Base64.getEncoder().encodeToString(user.getProfilePicture()));
+                data.setProperty(p + "picformat", user.getProfilePictureFormat());
+            }
         }
         store.write(data);
+    }
+
+    /**
+     * 【PR s3-r1-profile-picture-model】实现：Henry ｜ 审核：Stella
+     * 【Sprint 3 · US19 #67】主负责人：Henry。
+     * 做什么：把快照里的 Base64 头像解码成字节数组；缺失时返回空数组（没有头像），损坏时抛出异常由上层包装成
+     * “Invalid user snapshot”，与其他损坏字段的处理方式一致。
+     * 对接／验证：只在本类构造方法中使用；FileUserRepositoryTest 覆盖旧快照、正常头像和损坏 Base64 三种情况。
+     *
+     * @param encoded Base64 text, or {@code null}
+     * @return decoded picture bytes, or an empty array
+     */
+    private static byte[] decodePicture(String encoded) {
+        if (encoded == null || encoded.isBlank()) {
+            return new byte[0];
+        }
+        return Base64.getDecoder().decode(encoded.strip());
     }
 
     /**

@@ -105,6 +105,22 @@ public final class ScrollPreviewRenderer {
      * 对接／验证：测试用 ImageIO 生成 3x2 的 PNG 验证。
      */
     private static void image(byte[] content, List<String> lines) {
+        appendImageDetails(content, lines);
+    }
+
+    /**
+     * 【PR s2-r2-format-preview】实现：Sixian ｜ 审核：Stella；
+     * 【PR s3-r3-profile-picture-preview】实现：Sixian ｜ 审核：Stella（抽成包内可见，供头像预览复用）
+     * 【Sprint 3 · US20 #68】主负责人：Sixian。
+     * 做什么：读取图片尺寸并追加到输出；无法解析时说明详情不可用，再显示十六进制开头。
+     * 把 Sprint 2 的图片预览逻辑抽成可复用方法，让 ProfilePictureRenderer 用同样的方式渲染头像（US20“和图片卷轴一样预览”）。
+     * 对接／验证：ScrollPreviewRenderer 的 image() 和 ProfilePictureRenderer.render() 共用；
+     * ScrollFormatTest 的图片用例和头像预览测试都验证同样的 “Image size: W x H pixels” 输出。
+     *
+     * @param content image bytes
+     * @param lines output lines to append to
+     */
+    static void appendImageDetails(byte[] content, List<String> lines) {
         try {
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(content));
             if (image != null) {

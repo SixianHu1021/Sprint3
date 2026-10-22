@@ -13,6 +13,8 @@ import org.example.repository.file.FileUserRepository;
 import org.example.security.Pbkdf2PasswordHasher;
 import org.example.service.AccountService;
 import org.example.service.FileOpener;
+import org.example.service.ProfilePictureService;
+import org.example.service.ProfilePictureViewer;
 import org.example.service.ScrollEditService;
 import org.example.service.ScrollService;
 import org.example.ui.ConsoleIO;
@@ -73,9 +75,13 @@ public final class App {
 
             ScrollEditService edits = new ScrollEditService(scrollRepository, accounts);
 
-            // US17：真实程序用电脑默认应用打开预览（PDF、图片等）。
+            // 【Sprint 3 · US19 #67 / US20 #68】头像上传与预览服务，与其他服务共用同一个 userRepository。
+            ProfilePictureService pictures = new ProfilePictureService(userRepository, accounts);
+            ProfilePictureViewer picViewer = new ProfilePictureViewer(accounts, FileOpener.desktop());
+
+            // US17：真实程序用电脑默认应用打开预览（PDF、图片等）；US20：头像也用默认应用打开。
             ConsoleUi ui = new ConsoleUi(accounts, scrolls, edits, ConsoleIO.system(input, output),
-                    FileOpener.desktop());
+                    FileOpener.desktop(), pictures, picViewer);
             ui.run();
 
         } catch (IllegalStateException e) {
