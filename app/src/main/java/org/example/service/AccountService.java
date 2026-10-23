@@ -10,6 +10,7 @@ import org.example.security.PasswordHasher;
 /**
  * 【分工】本文件涉及以下工作（每个方法注释的第一行写明它属于哪个 PR、谁实现、谁审核）：
  *   - 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
+ *   - 【PR s3-r1-profile-picture-model】维护归属：Henry ｜ 审核归属：Stella（账户更新保留头像；修正见 validation.md）
  *   - Sprint 1 原作者：Henry（注册）、Yuhan（登录与管理员）（未标 PR 的方法本轮不改）
  *
  * Registers member profiles using injected storage and password hashing.
@@ -106,7 +107,8 @@ public final class AccountService {
     /**
      * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
      * 【Sprint 2 · US03 #4】主负责人：Henry。
-     * 做什么：已登录用户修改自己的姓名、邮箱、电话。ID key、用户名、角色和密码哈希保持不变。
+     * 【Sprint 3 修正 · P1 维护归属】2026-10-24 审计：重建 User 时保留头像字节和格式；非新增轮次。
+     * 做什么：已登录用户修改自己的姓名、邮箱、电话。ID key、用户名、角色、密码哈希和头像保持不变。
      * 对接／验证：邮箱／电话经过 ContactValidator，不能与其他用户重复（自己的旧值可以保留）；
      * 保存后重启仍有效（ProfileServiceTest 验证）。界面由 Henry 的 AccountScreens.profile 调用。
      *
@@ -124,7 +126,7 @@ public final class AccountService {
         phone = ContactValidator.phone(phone);
         ContactValidator.requireUnique(users, email, phone, current.getIdKey());
         User updated = new User(current.getIdKey(), current.getUsername(), current.getPasswordHash(),
-                name, email, phone, current.getRole());
+                name, email, phone, current.getRole(), current.getProfilePicture(), current.getProfilePictureFormat());
         users.save(updated);
         return updated;
     }
@@ -132,6 +134,7 @@ public final class AccountService {
     /**
      * 【PR s2-r1-profile-contacts】实现：Henry ｜ 审核：Yuhan
      * 【Sprint 2 · US03 #4】主负责人：Henry。
+     * 【Sprint 3 修正 · P1 维护归属】2026-10-24 审计：只替换密码哈希，保留已有头像字节和格式。
      * 做什么：先验证当前密码，再检查新密码规则，最后保存新哈希；原始新密码不会被保存。
      * 对接／验证：调用 Yuhan 的 PasswordHasher.verify/hash；修改后旧密码登录失败、新密码登录成功。
      *
@@ -147,7 +150,8 @@ public final class AccountService {
         }
         requirePasswordPolicy(newPassword, "New password");
         users.save(new User(current.getIdKey(), current.getUsername(), hasher.hash(newPassword),
-                current.getFullName(), current.getEmail(), current.getPhone(), current.getRole()));
+                current.getFullName(), current.getEmail(), current.getPhone(), current.getRole(),
+                current.getProfilePicture(), current.getProfilePictureFormat()));
     }
 
     /**

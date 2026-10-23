@@ -13,6 +13,8 @@ import org.example.service.ProfilePictureService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -106,6 +108,162 @@ class ProfilePictureServiceTest {
         assertEquals("jpg", users.findByIdKey("m").orElseThrow().getProfilePictureFormat());
     }
 
+    /** 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
+     * Corrective regression added after the initial Sprint 3 validation. */
+    @Test
+    void profileEditsPreservePictureAcrossRestart() throws IOException {
+        User original = pictures.setProfilePicture(image("avatar.png", "png"));
+        User updated = accounts.updateProfile("Renamed", "new@example.com", "789");
+        assertEquals("Renamed", updated.getFullName());
+        assertPictureEquals(original, updated);
+        assertPictureEquals(original, reopenedUser());
+    }
+
+    /** 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
+     * Corrective regression added after the initial Sprint 3 validation. */
+    @Test
+    void savingUnchangedProfilePreservesPictureAcrossRestart() throws IOException {
+        User original = pictures.setProfilePicture(image("avatar.jpg", "jpg"));
+        User updated = accounts.updateProfile(original.getFullName(), original.getEmail(), original.getPhone());
+        assertPictureEquals(original, updated);
+        assertPictureEquals(original, reopenedUser());
+    }
+
+    /** 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
+     * Corrective regression added after the initial Sprint 3 validation. */
+    @Test
+    void passwordChangePreservesPictureAcrossRestartAndLogin() throws IOException {
+        User original = pictures.setProfilePicture(image("avatar.png", "png"));
+        accounts.changePassword("password123", "replacement456");
+        assertPictureEquals(original, accounts.requireUser());
+        AccountService reopened = new AccountService(
+                new FileUserRepository(directory.resolve("users.properties")), HASHER);
+        assertThrows(IllegalArgumentException.class, () -> reopened.login("m", "password123"));
+        assertPictureEquals(original, reopened.login("m", "replacement456"));
+    }
+
+    /** 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
+     * Corrective regression added after the initial Sprint 3 validation. */
+    @Test
+    void signatureOnlyImagesAreRejectedWithoutReplacingExistingPicture() throws IOException {
+        User original = pictures.setProfilePicture(image("avatar.png", "png"));
+        byte[][] signatures = {
+            {(byte) 0x89, 'P', 'N', 'G', 13, 10, 26, 10},
+            {(byte) 0xff, (byte) 0xd8, (byte) 0xff, (byte) 0xe0}
+        };
+        String[] names = {"broken.png", "broken.jpg"};
+        for (int i = 0; i < signatures.length; i++) {
+            Path broken = Files.write(directory.resolve(names[i]), signatures[i]);
+            assertEquals(broken, ProfilePictureService.checkSource(broken.toString()));
+            IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                    () -> pictures.setProfilePicture(broken));
+            assertTrue(error.getMessage().contains("not a real JPG or PNG image"));
+            assertPictureEquals(original, accounts.requireUser());
+            assertPictureEquals(original, reopenedUser());
+        }
+    }
+
+    /** 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
+     * Corrective regression added after the initial Sprint 3 validation. */
+    @Test
+    void pngWithValidHeaderButMissingPixelDataIsRejected() throws IOException {
+        User original = pictures.setProfilePicture(image("avatar.jpg", "jpg"));
+        byte[] png = Files.readAllBytes(image("complete.png", "png"));
+        // Keep the signature and complete IHDR chunk, but no image data.
+        Path broken = Files.write(directory.resolve("truncated.png"), java.util.Arrays.copyOf(png, 33));
+        assertThrows(IllegalArgumentException.class, () -> pictures.setProfilePicture(broken));
+        assertPictureEquals(original, reopenedUser());
+    }
+
+    /** 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
+     * Corrective regression: direct callers must obey the extension whitelist. */
+    @Test
+    void directUploadsRejectUnsupportedExtensionsEvenWithValidImageBytes() throws IOException {
+        User original = pictures.setProfilePicture(image("original.jpg", "jpg"));
+        byte[] png = Files.readAllBytes(image("valid.png", "png"));
+        for (String name : new String[]{"disguised.txt", "noextension", "disguised.gif"}) {
+            Path invalid = Files.write(directory.resolve(name), png);
+            assertThrows(IllegalArgumentException.class, () -> pictures.setProfilePicture(invalid));
+            assertPictureEquals(original, reopenedUser());
+        }
+        assertEquals("jpg", pictures.setProfilePicture(image("valid.JPEG", "jpg")).getProfilePictureFormat());
+    }
+
+    /** 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
+     * Decoders may recover pixels from truncated files; uploads must reject them. */
+    @ParameterizedTest
+    @ValueSource(strings = {"png", "jpg"})
+    void missingPngAndJpegEndingsAreRejected(String format) throws IOException {
+        User original = pictures.setProfilePicture(image("original.png", "png"));
+        byte[] complete = Files.readAllBytes(image("complete." + format, format));
+        int removed = format.equals("png") ? 12 : 2;
+        Path truncated = Files.write(directory.resolve("missing-end." + format),
+                java.util.Arrays.copyOf(complete, complete.length - removed));
+        assertThrows(IllegalArgumentException.class, () -> pictures.setProfilePicture(truncated), format);
+        assertPictureEquals(original, reopenedUser());
+    }
+
+    /** 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
+     * PNG chunk checksums are part of file integrity, even when pixels decode. */
+    @Test
+    void pngWithCorruptChecksumIsRejected() throws IOException {
+        User original = pictures.setProfilePicture(image("original.jpg", "jpg"));
+        byte[] content = Files.readAllBytes(image("complete.png", "png"));
+        content[29] ^= 1; // IHDR checksum, leaving all pixel data intact.
+        Path corrupt = Files.write(directory.resolve("bad-crc.png"), content);
+        assertThrows(IllegalArgumentException.class, () -> pictures.setProfilePicture(corrupt));
+        assertPictureEquals(original, reopenedUser());
+    }
+
+    /** 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
+     * Valid signatures with damaged payloads must not replace a saved avatar. */
+    @Test
+    void damagedImagePayloadsAreRejected() throws IOException {
+        User original = pictures.setProfilePicture(image("original.png", "png"));
+        for (String format : new String[]{"png", "jpg"}) {
+            byte[] content = Files.readAllBytes(image("complete." + format, format));
+            byte[] damaged = java.util.Arrays.copyOf(content, content.length / 2);
+            Path corrupt = Files.write(directory.resolve("bad-payload." + format), damaged);
+            assertThrows(IllegalArgumentException.class, () -> pictures.setProfilePicture(corrupt), format);
+            assertPictureEquals(original, reopenedUser());
+        }
+    }
+
+    /** 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
+     * Consecutive account changes persist the avatar under the correct owner. */
+    @Test
+    void consecutiveAccountChangesPreservePictureContentAndOwnershipAfterRestart() throws IOException {
+        User member = pictures.setProfilePicture(image("member.png", "png"));
+        accounts.register("n", "other", "otherpass123", "Other", "other@example.com", "789");
+        accounts.login("n", "otherpass123");
+        User other = pictures.setProfilePicture(image("other.jpg", "jpg"));
+        accounts.login("m", "password123");
+        accounts.updateProfile("Renamed", "new@example.com", "123");
+        accounts.changePassword("password123", "replacement456");
+        accounts.updateProfile("Renamed Again", "new@example.com", "123");
+        FileUserRepository restored = new FileUserRepository(directory.resolve("users.properties"));
+        AccountService restarted = new AccountService(restored, HASHER);
+        assertThrows(IllegalArgumentException.class, () -> restarted.login("m", "password123"));
+        User loggedIn = restarted.login("m", "replacement456");
+        assertEquals("m", loggedIn.getIdKey());
+        assertEquals("Renamed Again", loggedIn.getFullName());
+        assertPictureEquals(member, loggedIn);
+        assertEquals("n", restarted.login("n", "otherpass123").getIdKey());
+        assertPictureEquals(other, restarted.requireUser());
+    }
+
+    /** 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry */
+    private User reopenedUser() {
+        return new FileUserRepository(directory.resolve("users.properties")).findByIdKey("m").orElseThrow();
+    }
+
+    /** 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry */
+    private static void assertPictureEquals(User expected, User actual) {
+        assertTrue(actual.hasProfilePicture());
+        assertEquals(expected.getProfilePictureFormat(), actual.getProfilePictureFormat());
+        assertArrayEquals(expected.getProfilePicture(), actual.getProfilePicture());
+    }
+
     /**
      * 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
      * 非 jpg/jpeg/png 的扩展名在 checkSource 阶段被拒绝。
@@ -152,6 +310,8 @@ class ProfilePictureServiceTest {
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
                 () -> ProfilePictureService.checkSource(big.toString()));
         assertTrue(error.getMessage().contains("5 MiB"));
+        assertThrows(IllegalArgumentException.class, () -> pictures.setProfilePicture(big));
+        assertFalse(reopenedUser().hasProfilePicture());
     }
 
     /**

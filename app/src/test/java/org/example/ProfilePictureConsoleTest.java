@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import javax.imageio.ImageIO;
+import org.example.model.User;
 import org.example.repository.file.FileUserRepository;
 import org.example.security.PasswordHasher;
 import org.example.service.AccountService;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -119,6 +121,48 @@ class ProfilePictureConsoleTest {
         String output = screen("1", text.toString(), png.toString(), "0");
         assertTrue(output.contains("Error: Profile picture must be a JPG, JPEG or PNG file"));
         assertTrue(output.contains("Profile picture uploaded (png)."));
+    }
+
+    /** 【PR s3-r4-profile-picture-screen】实现：Yuhan ｜ 审核：Sixian
+     * Content errors must retry the path without showing the menu in between. */
+    @Test
+    void invalidContentRetriesImmediatelyUntilAValidImageIsUploaded() throws IOException {
+        Path fake = Files.writeString(directory.resolve("fake.png"), "not an image");
+        Path broken = Files.write(directory.resolve("broken.jpg"),
+                new byte[]{(byte) 0xff, (byte) 0xd8, (byte) 0xff});
+        Path valid = image("valid.png", "png");
+        String output = screen("1", fake.toString(), broken.toString(), valid.toString(), "0");
+        int error = output.indexOf("Error: That file is not a real JPG or PNG image");
+        int success = output.indexOf("Profile picture uploaded (png).");
+        assertTrue(error >= 0 && success > error, output);
+        String retry = output.substring(error, success);
+        assertTrue(retry.contains("Picture file path: "), retry);
+        assertFalse(retry.contains("Profile picture menu:"), retry);
+        assertArrayEquals(Files.readAllBytes(valid), users.findByIdKey("m").orElseThrow().getProfilePicture());
+    }
+
+    /** 【PR s3-r4-profile-picture-screen】实现：Yuhan ｜ 审核：Sixian
+     * Cancelling after a content error preserves the saved picture on disk. */
+    @Test
+    void cancellingDuringContentRetryPreservesExistingPicture() throws IOException {
+        User original = pictures.setProfilePicture(image("original.jpg", "jpg"));
+        Path fake = Files.writeString(directory.resolve("fake.png"), "not an image");
+        String output = screen("1", fake.toString(), "cancel", "0");
+        assertTrue(output.contains("Cancelled."), output);
+        assertFalse(output.contains("Profile picture uploaded"), output);
+        User restored = new FileUserRepository(directory.resolve("users.properties")).findByIdKey("m").orElseThrow();
+        assertArrayEquals(original.getProfilePicture(), restored.getProfilePicture());
+        assertEquals(original.getProfilePictureFormat(), restored.getProfilePictureFormat());
+    }
+
+    /** 【PR s3-r4-profile-picture-screen】实现：Yuhan ｜ 审核：Sixian
+     * End of input during retry still reaches the application's normal EOF handler. */
+    @Test
+    void closedInputDuringContentRetryDoesNotLoop() throws IOException {
+        Path fake = Files.writeString(directory.resolve("fake.png"), "not an image");
+        org.junit.jupiter.api.Assertions.assertThrows(java.util.NoSuchElementException.class,
+                () -> screen("1", fake.toString()));
+        assertFalse(users.findByIdKey("m").orElseThrow().hasProfilePicture());
     }
 
     /**

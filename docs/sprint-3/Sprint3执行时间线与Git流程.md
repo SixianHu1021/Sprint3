@@ -3,6 +3,9 @@
 
 **起点：团队仓库 `A2-T16-2` 的 `main` 停在 Sprint 2 之后（tag `sprint-2`，Sprint 2 的 10 个故事已完成，共 211 个测试）。**
 以下操作都在**团队仓库**执行；`A3-copy`（个人参考仓库）只用来查参考代码，里面已经是本 Sprint 全部完成后的样子。
+**2026-10-24 纠错说明：** 下文仍是原定 P1–P4、R1–R4 的计划，不是团队完成记录。
+初版 235 个测试未覆盖本次发现的缺陷；当前本地参考实现为 251 个测试通过，详见 [validation.md](validation.md)。
+账户更新保留头像归 P1，严格校验归 P2，内容错误重试及独立进程验证归 P4；不新增任务或轮次。
 每一轮结束后才进入下一轮。没有开发任务的人负责审核或准备测试，不需要硬开空分支。
 
 文件位置：生产代码在 `app/src/main/java/org/example/`，测试在 `app/src/test/java/org/example/`。
@@ -37,7 +40,7 @@
 | Sprint Goal | 让用户的账户更个性化：登录用户能从“我的资料”上传头像（只接受真实的 JPG/PNG），并能像预览图片卷轴一样预览头像、用默认应用打开；访客不能使用；旧账户向后兼容。 |
 | 角色 | Product Owner：Stella；Scrum Master：Henry；开发：Yuhan、Sixian（四人都写代码） |
 | 故事 | 2 个，共 13 点（US19 = 8，US20 = 5） |
-| 测试 | 完成后共 235 个（Sprint 2 的 211 个 + 新增 24 个），行覆盖率约 96% |
+| 测试 | 初版参考实现 235 个（211 + 24）；10-24 纠错后 251 个（另加 16 个回归执行用例），行覆盖率 96.24% |
 | 版本标签 | `sprint-3` |
 
 | 成员 | 故事（Issue） | 点数 | 负责的 PR |
@@ -55,21 +58,22 @@
 
 | # | 轮次 | 分支 | 实现 | 审核 | 内容 | 合并顺序 |
 | --- | --- | --- | --- | --- | --- | --- |
-| P1 | R1 | `s3-r1-profile-picture-model` | Henry | Stella | User 头像字段（可选）、withProfilePicture；FileUserRepository Base64 持久化、读旧快照 | 本轮第一份 |
-| P2 | R2 | `s3-r2-profile-picture-service` | Stella | Henry | ProfilePictureService：checkSource（扩展名/大小）、setProfilePicture（内容魔数校验、覆盖、访客） | 在 P1 之后 |
+| P1 | R1 | `s3-r1-profile-picture-model` | Henry | Stella | User 头像字段（可选）、withProfilePicture；FileUserRepository Base64 持久化、读旧快照；AccountService 账户更新保留头像（纠错） | 本轮第一份 |
+| P2 | R2 | `s3-r2-profile-picture-service` | Stella | Henry | ProfilePictureService：checkSource（扩展名/大小）、setProfilePicture（服务自身检查扩展名、严格解码及完整性、覆盖、访客） | 在 P1 之后 |
 | P3 | R2 | `s3-r3-profile-picture-preview` | Sixian | Stella | ProfilePictureRenderer（复用图片预览）、ProfilePictureViewer（复用 FileOpener）；ScrollPreviewRenderer 抽出 appendImageDetails | 在 P1 之后（与 P2 并行） |
 | P4 | R3 | `s3-r4-profile-picture-screen` | Yuhan | Sixian（界面）、Henry（资料接线确认） | ProfilePictureScreen（上传/状态/预览/打开）；AccountScreens 资料菜单接入；ConsoleUi/App 接线 | 最后（P2、P3 之后） |
 
 ## 本 Sprint 的防冲突规则（沿用 Sprint 1/2 回顾的改进行动）
 
 1. **新功能放进新文件**：头像的服务和页面全部是新类（ProfilePictureService / Renderer / Viewer / ProfilePictureScreen），
-   不反复改 AccountService、ScrollService。
+   不反复改共享业务文件；本次纠错必须修改 AccountService 的两处账户重建，固定归 P1/Henry，ScrollService 无需修改。
 2. **共享文件每处只指定一个人、一个 PR**：
 
 | 共享文件 | 谁改 | PR | 改什么 |
 | --- | --- | --- | --- |
 | `model/User.java` | Henry | P1 | 新增可选头像字段、9 参数构造方法、hasProfilePicture/get../withProfilePicture（7 参数构造方法委托，Sprint 1/2 代码不改） |
 | `repository/file/FileUserRepository.java` | Henry | P1 | 读写 Base64 头像、读没有 picture 字段的旧快照、decodePicture |
+| `service/AccountService.java` | Henry | P1 | 10-24 纠错：updateProfile/changePassword 重建时保留头像字节和格式；不改变新账户默认值 |
 | `service/ScrollPreviewRenderer.java` | Sixian | P3 | 把图片渲染抽成包内可见的 appendImageDetails（image() 委托），供头像预览复用（同一原作者，只扩展不改规则） |
 | `ui/AccountScreens.java` | Yuhan（接线） | P4 | 新增可选 pictureScreen 构造参数；资料菜单多一个 “Profile picture” 项；资料页显示 Picture 状态（不改原有方法） |
 | `ui/ConsoleUi.java`、`App.java` | Yuhan | P4 | 新增接收 ProfilePictureService/Viewer 的构造方法与接线（保留旧构造方法供 Sprint 1/2 测试） |
@@ -140,7 +144,8 @@ git push -u origin HEAD
 | --- | --- |
 | `model/User.java` | 新增可选字段 `profilePicture`、`profilePictureFormat` 和常量 `NO_PICTURE`；9 参数构造方法（7 参数委托给它，Sprint 1/2 代码不改）；`hasProfilePicture()`、`getProfilePicture()`（拷贝）、`getProfilePictureFormat()`、`withProfilePicture()` |
 | `repository/file/FileUserRepository.java` | 构造方法读取 `picture`（Base64）、`picformat`（缺省 none）；`persist()` 对有头像的用户写这两项；私有 `decodePicture()` |
-| 测试（7 个） | 新建 `UserProfilePictureTest`：默认没有头像、覆盖、防御性拷贝、Base64 重启后仍在、旧快照读成没有头像、损坏 Base64 被拒 |
+| `service/AccountService.java`（10-24 纠错，P1 职责内） | `updateProfile` / `changePassword` 保留头像字节及格式；在服务回归及 P4 独立进程测试中验证 |
+| 测试（6 个；初版表写 7 是笔误） | 新建 `UserProfilePictureTest`：默认没有头像、覆盖、防御性拷贝、Base64 重启后仍在、旧快照读成没有头像、损坏 Base64 被拒 |
 
 - **PR 标题：** `Store an optional profile picture with a backward-compatible snapshot`
 - **关联：** `Relates to #67`。
@@ -158,8 +163,8 @@ git push -u origin HEAD
 
 | 文件 | 要实现的函数 |
 | --- | --- |
-| 新建 `service/ProfilePictureService.java` | 构造方法、`checkSource()`（路径/扩展名/大小的逐项检查）、`setProfilePicture()`（读取 → 内容魔数确认真 JPG/PNG → 覆盖保存）、私有 `readSource()`、`extensionOf()`；常量 `MAX_BYTES`（5 MiB）、白名单 `jpg/jpeg/png` |
-| 测试（7 个） | 新建 `ProfilePictureServiceTest`：合法 PNG/JPG 上传并持久化、覆盖旧头像、非图片扩展名被拒、改名假图片（内容）被拒、超大被拒、访客不能上传（真实图片用 ImageIO 生成） |
+| 新建 `service/ProfilePictureService.java` | 构造方法、`checkSource()`（路径/扩展名/大小的逐项检查）、`setProfilePicture()`（复用 checkSource → 有界读取 → 魔数/严格解码/PNG 完整性 → 覆盖保存）、私有 `readSource()`、`extensionOf()`、`canDecode()`、`hasValidPngChunks()`（后两者为纠错辅助函数）；常量 `MAX_BYTES`（5 MiB）、白名单 `jpg/jpeg/png` |
+| 测试（初版 7，纠错后 18；含与 P1 协作的账户更新回归） | `ProfilePictureServiceTest`：合法 PNG/JPG 上传并持久化、覆盖旧头像、非图片扩展名被拒、改名假图片（内容）被拒、超大被拒、访客不能上传（真实图片用 ImageIO 生成） |
 
 - **PR 标题：** `Validate and store profile pictures (JPG/PNG by extension and content)`
 - **关联：** `Relates to #67`。
@@ -194,15 +199,15 @@ git switch -c s3-r4-profile-picture-screen
 
 | 文件 | 要做的事 |
 | --- | --- |
-| 新建 `ui/ProfilePictureScreen.java` | 构造方法、`show()`（编号菜单：上传/预览/返回）、`showStatus()`、`upload()`（askValid + checkSource，再 setProfilePicture）、`preview()`（渲染 + 可打开子菜单）、`openInApp()` |
+| 新建 `ui/ProfilePictureScreen.java` | 构造方法、`show()`（编号菜单：上传/预览/返回）、`showStatus()`、`upload()`（askValid + checkSource，再 setProfilePicture；内容/读取错误立即重问，cancel 仍返回菜单）、`preview()`（渲染 + 可打开子菜单）、`openInApp()` |
 | `ui/AccountScreens.java` | 新增可选 `pictureScreen` 构造参数；`profile()` 菜单在非空时多一个 “Profile picture” 项；`showProfile()` 显示 `Picture:` 状态（不改原有方法） |
 | `ui/ConsoleUi.java` | 新增接收 `ProfilePictureService`、`ProfilePictureViewer` 的构造方法，创建 `ProfilePictureScreen` 并传入 `AccountScreens`；保留旧构造方法供 Sprint 1/2 测试；banner 改为 “Sprint 3” |
 | `App.java` | 创建 `ProfilePictureService`（共用同一个 userRepository）和 `ProfilePictureViewer`（真实 `FileOpener.desktop()`），用新构造方法启动 |
-| 测试（4 个） | 新建 `ProfilePictureConsoleTest`：编号菜单上传并显示状态、非图片立即重问（US14）、预览显示尺寸并可打开、没有头像预览只显示说明、资料页显示 Picture 状态且菜单含该项 |
+| 测试（初版实际 5，原表写 4 是笔误；纠错后 8 + 独立 JVM 2） | `ProfilePictureConsoleTest`、`ProfilePictureLifecycleTest`：编号菜单上传并显示状态、非图片立即重问（US14）、预览显示尺寸并可打开、没有头像预览只显示说明、资料页显示 Picture 状态且菜单含该项 |
 
 - **PR 标题：** `Add the profile picture screen and wire it into My profile`
 - **关联：** `Relates to #67, #68`。
-- **合并标准：** `./gradlew clean build` 通过（235 个测试、覆盖率 >75%）；Jenkins 对**这一提交**构建成功；
+- **合并标准：** `./gradlew clean build` 通过（10-24 本地纠错基准为 251 个测试、覆盖率 >75%；团队最新提交必须重跑）；Jenkins 对**这一提交**构建成功；
   四人按 `delivery.md` 场景表手动走一遍（包括在真实终端用 `app/build/install/app/bin/app` 打开一张头像）。
 
 如有问题，由问题所属模块负责人（看注释第一行）从最新 main 开 `s3-fix-具体问题`，同样提 PR、审核和合并。
@@ -266,3 +271,10 @@ Jenkins 必须检查 PR 最新提交或明确的待合并 SHA，不能拿旧 mai
 第三轮：P4 Yuhan 头像页面 + 资料接线 + App 接线（Stand-up 2：10-27）→ 四人验收 → 合并
 第四轮：Stella README → 故事 Done → 标签 sprint-3 → 10-29 演示 → 回顾 → 报告
 ```
+
+## 2026-10-24 验证补记（不新增轮次）
+
+本地 `clean test` / `clean build` 均通过：251 个测试，0 失败，行覆盖率 96.24%。
+初版 235 → 前次本地修正 240 → 本次审计 251 的时间顺序及失败复现见 [validation.md](validation.md)。
+模型/存储格式不变，账户更新保留头像是现有功能的必要纠错；新增私有校验函数和回归测试不增加开发任务。
+原计划仍为 2 个故事、13 点、4 份 PR 任务、4 轮及 Planning；审核与合并安排不变。

@@ -12,13 +12,13 @@ The PO marks a story Done only after every criterion below is demonstrated and t
 | Registration does not ask for a picture; new accounts start without one | `User` 7-arg constructor delegates with `NO_PICTURE`; `AccountScreens.createAccount` unchanged | `UserProfilePictureTest.newAccountsStartWithoutAProfilePicture`; `ProfilePictureConsoleTest` (status "not added") |
 | A logged-in user can add a picture from the edit profile section | `AccountScreens.profile` → `ProfilePictureScreen.show/upload` | `ProfilePictureConsoleTest.uploadsThroughNumberedMenuAndShowsStatus` |
 | User provides a local file path | `ProfilePictureScreen.upload` with `askValid` | `uploadsThroughNumberedMenuAndShowsStatus` |
-| Only JPG/JPEG and PNG accepted; other types rejected with a clear error | `ProfilePictureService.checkSource` extension whitelist | `ProfilePictureServiceTest.nonImageExtensionsAreRejectedByCheckSource`; `ProfilePictureConsoleTest.invalidPictureIsRepromptedImmediately` |
-| A file whose content is not a real JPG/PNG is rejected even with .jpg/.png name | `ProfilePictureService.setProfilePicture` uses `FileFormat.detect(null, bytes)` | `ProfilePictureServiceTest.fakeImageWithImageExtensionIsRejected` |
-| Invalid path / missing file / over the size limit reported immediately; retry or cancel | `checkSource` + `ConsoleIO.askValid` (cancel) | `nonImageExtensionsAreRejectedByCheckSource`, `oversizedPictureIsRejected`, `invalidPictureIsRepromptedImmediately` |
+| Only JPG/JPEG and PNG accepted; other types rejected with a clear error | `ProfilePictureService.checkSource` extension whitelist, also called by `setProfilePicture` | `ProfilePictureServiceTest.nonImageExtensionsAreRejectedByCheckSource`, `directUploadsRejectUnsupportedExtensionsEvenWithValidImageBytes`; `ProfilePictureConsoleTest.invalidPictureIsRepromptedImmediately` |
+| A file whose content is not a real JPG/PNG is rejected even with .jpg/.png name | `setProfilePicture`: magic number + strict decoding/warnings + PNG chunk integrity | `ProfilePictureServiceTest.fakeImageWithImageExtensionIsRejected`, `signatureOnlyImagesAreRejectedWithoutReplacingExistingPicture`, `missingPngAndJpegEndingsAreRejected`, `pngWithCorruptChecksumIsRejected`, `damagedImagePayloadsAreRejected` |
+| Invalid path / missing file / over the size limit reported immediately; retry or cancel | `checkSource` + `ConsoleIO.askValid` (cancel); upload retries content/read errors | `nonImageExtensionsAreRejectedByCheckSource`, `oversizedPictureIsRejected`, `invalidPictureIsRepromptedImmediately`, `invalidContentRetriesImmediatelyUntilAValidImageIsUploaded`, `cancellingDuringContentRetryPreservesExistingPicture`, `closedInputDuringContentRetryDoesNotLoop` |
 | Uploading a new picture replaces the previous one | `User.withProfilePicture`, `setProfilePicture` saves over | `ProfilePictureServiceTest.uploadingReplacesThePreviousPicture` |
-| Picture stored with the account and persists across sessions | `FileUserRepository` Base64 persistence | `UserProfilePictureTest.profilePictureSurvivesRestart`; `ProfilePictureServiceTest.uploadsValidPngAndPersists` |
+| Picture stored with the account and persists across sessions | `FileUserRepository` Base64 persistence; account updates preserve picture fields | `UserProfilePictureTest.profilePictureSurvivesRestart`; `ProfilePictureServiceTest.uploadsValidPngAndPersists`, `consecutiveAccountChangesPreservePictureContentAndOwnershipAfterRestart`; `ProfilePictureLifecycleTest.consecutiveAccountChangesSurviveCompleteApplicationRestart` |
 | Guests cannot upload a profile picture | `ProfilePictureService.setProfilePicture` → `requireUser` | `ProfilePictureServiceTest.guestsCannotUpload` |
-| (Backward compatibility) older accounts without a picture load correctly | `FileUserRepository` defaults missing fields | `UserProfilePictureTest.oldSnapshotWithoutPictureLoadsAsNoPicture` |
+| (Backward compatibility) older accounts without a picture load correctly | `FileUserRepository` defaults missing fields | `UserProfilePictureTest.oldSnapshotWithoutPictureLoadsAsNoPicture`; `ProfilePictureLifecycleTest.legacySnapshotSupportsFullLifecycleWithoutMigration` |
 
 ## US20 — Sixian (preview/open), Yuhan (screen) — Preview the profile picture like an image scroll (#68)
 
@@ -39,3 +39,10 @@ The PO marks a story Done only after every criterion below is demonstrated and t
 - JPEG files are normalised to the `jpg` format label for a consistent extension when opened.
 - Opening or previewing a profile picture is never counted as a scroll download or upload.
 - Profile pictures are stored inside the user snapshot as Base64; snapshots written before Sprint 3 remain readable.
+
+## Corrective verification — 2026-10-24
+
+The extra evidence above was added after the initial 235-test run; it was not part of the earlier
+review. The current local suite has 251 passing test executions, including separate-JVM restarts.
+These corrections enforce existing criteria and do not add stories, tasks or rounds.
+See [validation](validation.md) for chronology, causes and verification limits.

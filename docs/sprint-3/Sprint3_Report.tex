@@ -134,9 +134,9 @@ The following screenshots demonstrate the Sprint 3 console workflows: uploading 
 
 \begin{figure}[H]
     \centering
-    \placeholder{\textwidth}{JUnit results: 235 tests passed, 0 failures, 0 skipped.}
+    \placeholder{\textwidth}{Corrective local run (2026-10-24): 251 tests passed, 0 failures, 0 skipped.}
     \captionsetup{justification=centering}
-    \caption{Test results: all 235 tests passed (211 from Sprint 2 + 24 new). [Capture from Jenkins/local run.]}
+    \caption{Corrective local test results: 251 passed (235 original + 16 corrective executions). The 235-test historical run is dated 2026-10-22. [Capture the final Jenkins/local run.]}
     \label{fig:sprint3-tests}
 \end{figure}
 
@@ -214,7 +214,7 @@ Sixian & US20 --- preview renderer and viewer (reusing image preview and FileOpe
 \end{table}
 
 \noindent\textbf{Technical Planning}\par
-The team kept the Sprint 1/2 layering (model, repository, security, service, UI) and added new service and screen classes per feature, so that members work in parallel with almost no shared-file edits. The only shared files touched were the account model and storage (Henry), the extracted image-preview helper (Sixian, the original author of \texttt{ScrollPreviewRenderer}), and the wiring files \texttt{AccountScreens}, \texttt{ConsoleUi} and \texttt{App} (Yuhan). The dependency order was planned explicitly: the model/storage PR must merge first, the validation and preview PRs then proceed in parallel, and the UI wiring PR merges last.
+The team kept the Sprint 1/2 layering (model, repository, security, service, UI) and added new service and screen classes per feature, so that members work in parallel with almost no shared-file edits. Shared files include the account model and storage (Henry), the extracted image-preview helper (Sixian, the original author of \texttt{ScrollPreviewRenderer}), and the wiring files \texttt{AccountScreens}, \texttt{ConsoleUi} and \texttt{App} (Yuhan). The 2026-10-24 corrective audit additionally preserves avatar fields in \texttt{AccountService} under P1 maintenance. The dependency order was planned explicitly: the model/storage PR must merge first, the validation and preview PRs then proceed in parallel, and the UI wiring PR merges last.
 
 \noindent\textbf{Sprint Backlog Management}\par
 The Sprint Backlog was managed through GitHub Projects using four states: Todo, In Progress, Review and Done. The planning meeting minutes and attendance evidence are provided in Appendix~\ref{app:sprint3-planning}.
@@ -339,7 +339,9 @@ Henry implemented the profile-picture fields on the account model and the Base64
 \subsection{CI (Continuous Integration) Tools and Structure Management}
 
 \subsubsection*{Build, Testing and Coverage}
-Gradle (with the wrapper, JDK 21) manages the build, tests and distribution. JUnit 5 tests cover the account model and storage, the validation service, the preview renderer and viewer, and the profile-picture console screen. A local \texttt{./gradlew clean build} passed Checkstyle, the 75\% line-coverage gate and all \textbf{235 tests} (211 from Sprint 2 + 24 new), with approximately 96\% line and 97\% instruction coverage (see \texttt{docs/sprint-3/validation.md}). [Replace with the Jenkins figures for the tagged commit.]
+Gradle (with the wrapper, JDK 21) manages the build, tests and distribution. JUnit 5 tests cover the account model and storage, the validation service, the preview renderer and viewer, and the profile-picture console screen. The initial local run on 2026-10-22 passed Checkstyle, the 75\% line-coverage gate and \textbf{235 tests} (211 from Sprint 2 + 24 new), but missed the account-update, corrupt-image, direct-service extension and content-retry cases. The corrective audit on 2026-10-24 passed \texttt{./gradlew clean test} and \texttt{./gradlew clean build}: \textbf{251 tests}, zero failures, 96.24\% line and 96.62\% instruction coverage (see \texttt{docs/sprint-3/validation.md}). This includes 16 corrective test executions, with two tests launching the real application in separate JVMs; it is local evidence, not a Jenkins or peer-review result. [Replace with the Jenkins figures for the tagged commit.]
+
+Corrective maintenance remains within the existing US19/US20 scope: two stories, 13 points, four PR tasks (P1--P4), four rounds (R1--R4), plus Planning. P1/Henry owns account preservation, P2/Stella the private decoding/integrity helpers, and P4/Yuhan retry and process-lifecycle tests. These are maintenance assignments, not claims that the corrections passed earlier reviews. No new development round or public production interface was added.
 
 \subsubsection*{Jenkins Continuous Integration}
 Jenkins runs in Docker, polls \texttt{main}, and executes the pipeline defined in the repository \texttt{Jenkinsfile}: Checkout, Prepare, Build, Test (JUnit results), Code Quality (Checkstyle), Coverage (JaCoCo report and the coverage-verification gate) and Package (JAR and \texttt{distZip}). JaCoCo reports and the application archive are stored as build artifacts.
@@ -366,14 +368,14 @@ The Sprint 3 additions follow the existing packages: the \texttt{model}/\texttt{
 \subsection{Functional and Non-functional Aspects}
 
 \subsubsection*{Functional Requirements}
-Sprint 3 delivered two user stories. US19 lets a logged-in user upload a JPG or PNG profile picture from ``My profile''; the picture is validated by extension, real content (magic number) and size, replaces any previous picture, and persists across sessions. US20 lets the user see whether a picture has been added, preview it with its format, size and pixel dimensions (the same as an image scroll), and open it in the default application. Guests cannot upload or preview pictures, and accounts created before Sprint 3 load without a picture.
+Sprint 3 delivered two user stories. US19 lets a logged-in user upload a JPG or PNG profile picture from ``My profile''; the picture is validated by extension, real content (strict image decoding, decoder warnings and PNG chunk integrity) and size, replaces any previous picture, and persists across sessions. US20 lets the user see whether a picture has been added, preview it with its format, size and pixel dimensions (the same as an image scroll), and open it in the default application. Guests cannot upload or preview pictures, and accounts created before Sprint 3 load without a picture.
 
 \subsubsection*{Non-functional Requirements}
-\noindent\textbf{Security and robustness.} Validation rejects non-image types, disguised (renamed) files and oversized files, with immediate, consistent \texttt{Error:} feedback and the option to cancel. Opening a picture on a machine without a desktop reports the reason and the program continues. Authorisation is enforced in the service layer, so guests cannot upload or preview.
+\noindent\textbf{Security and robustness.} Validation rejects non-image types, disguised (renamed) files and oversized files, with immediate, consistent \texttt{Error:} feedback and the option to cancel. After the corrective audit, direct service calls enforce the extension whitelist, and content errors re-prompt for a path within the upload workflow. Opening a picture on a machine without a desktop reports the reason and the program continues. Authorisation is enforced in the service layer, so guests cannot upload or preview.
 
-\noindent\textbf{Reliability and compatibility.} The account model stays immutable and the picture is optional; snapshots written before Sprint 3 remain readable, and no Sprint 1/2 test required changes. Pictures are stored as Base64 inside the user snapshot and survive restarts.
+\noindent\textbf{Reliability and compatibility.} The account model stays immutable and the picture is optional; snapshots written before Sprint 3 remain readable, and no Sprint 1/2 test required changes. Pictures are stored as Base64 inside the user snapshot and survive restarts, including consecutive profile and password updates. The 2026-10-24 audit traced both losses to seven-argument account reconstruction in \texttt{AccountService}; using all nine fields preserves the picture. \texttt{User} and \texttt{FileUserRepository} needed no schema or implementation changes.
 
-\noindent\textbf{Maintainability.} New functionality lives in new service and screen classes; the only shared edits are the account model/storage, the extracted image helper (same author) and the wiring files. Previewing reuses the image rendering and opening reuses \texttt{FileOpener}, avoiding duplicated logic.
+\noindent\textbf{Maintainability.} New functionality lives in new service and screen classes; shared edits include the account model/storage, the extracted image helper (same author), the wiring files and the corrective preservation of avatar fields in \texttt{AccountService}. Previewing reuses the image rendering and opening reuses \texttt{FileOpener}, avoiding duplicated logic.
 
 \subsection{Code Quality}
 

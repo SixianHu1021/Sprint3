@@ -71,6 +71,21 @@ The following user stories are implemented in Sprint 1:
 | US17 | #52 | Preview by file format (text lines, image size, PDF info, ZIP entries, hex); correct extension on download | Sixian |
 | US18 | #53 | Sort scrolls by download count (most downloaded first, ties newest first) | Sixian |
 
+## 2b. Sprint 3 Features
+
+- US19 (#67): authenticated users upload a JPG/JPEG or PNG profile picture from My profile.
+  The service checks the extension, the 5 MiB limit, actual image decoding and file integrity.
+  Invalid uploads keep the existing picture and immediately re-prompt for a path; `cancel` returns.
+- US20 (#68): preview format, byte size and dimensions, then open in the default application.
+  Guests cannot upload or open profile pictures.
+- Pictures are stored as Base64 with the account. Profile and password changes preserve their bytes
+  and format across application restarts. Older snapshots without picture fields remain readable.
+
+The 2026-10-24 local corrective audit passed 251 tests and the full build (96.24% line coverage).
+The earlier 235-test run missed the corrected cases; see the dated
+[validation record](docs/sprint-3/validation.md) and [development plan](docs/sprint-3/Sprint3执行时间线与Git流程.md).
+The existing two stories, four PR tasks and four development rounds remain unchanged.
+
 ## 3. Requirements
 
 - Java Development Kit (JDK) 21

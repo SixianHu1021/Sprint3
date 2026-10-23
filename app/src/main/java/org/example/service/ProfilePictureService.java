@@ -1,12 +1,19 @@
 package org.example.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.zip.CRC32;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 import org.example.model.User;
 import org.example.repository.UserRepository;
 
@@ -15,7 +22,7 @@ import org.example.repository.UserRepository;
  *   - 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
  *
  * 【Sprint 3 · US19 #67】主负责人：Stella（Product Owner，本轮的业务校验）。
- * 做什么：已登录用户给自己的账户上传头像。只接受 JPG/JPEG 和 PNG，而且要求扩展名和真实内容（魔数）都对，
+ * 做什么：已登录用户给自己的账户上传头像。只接受 JPG/JPEG 和 PNG，而且要求扩展名和真实内容（魔数及图片解码）都对，
  * 所以把一个 .txt 改名成 .png 会被拒绝。文件不存在、不是普通文件或超过大小上限会立即报错，用户可以重试或 cancel。
  * 上传新头像会覆盖旧头像。访客不能上传（requireUser 先检查登录）。
  * 对接/验证：登录检查调用 Yuhan 的 AccountService.requireUser；格式判断调用 Sixian 的 FileFormat.detect；
@@ -50,7 +57,7 @@ public final class ProfilePictureService {
      * 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
      * 【Sprint 3 · US19 #67 / US14 #49 逐项检查】主负责人：Stella。
      * 做什么：输入文件路径后立即检查：路径非空、文件存在且是普通文件、在大小上限内、扩展名是 jpg/jpeg/png。
-     * 对接/验证：ProfilePictureScreen 用 ConsoleIO.askValid 调用；真正的内容校验（魔数）在读取文件时由 setProfilePicture 完成，
+     * 对接/验证：ProfilePictureScreen 用 ConsoleIO.askValid 调用；真正的内容校验（魔数及图片解码）在读取文件时由 setProfilePicture 完成，
      * 因为这里只拿到路径还没读内容。返回规范化后的 Path 供随后上传。
      *
      * @param rawPath raw file path typed by the user
@@ -82,10 +89,10 @@ public final class ProfilePictureService {
     /**
      * 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
      * 【Sprint 3 · US19 #67】主负责人：Stella。
-     * 做什么：读取文件、再次确认大小、按内容（魔数）确认它真的是 JPG 或 PNG，然后保存为当前用户的头像（覆盖旧的）。
+     * 做什么：读取文件、再次确认大小、按内容（魔数及图片解码）确认它真的是 JPG 或 PNG，然后保存为当前用户的头像（覆盖旧的）。
      * 即使扩展名是 .png，只要内容不是真正的 PNG/JPG 也会被拒绝。
      * 对接/验证：读取规则与卷轴上传一致（多读 1 字节判断超限，不把超大文件读入内存）；
-     * 内容判断调用 Sixian 的 FileFormat.detect（忽略文件名，只看字节），结果必须是 png/jpg/jpeg。
+     * setProfilePicture 自身复用 checkSource，直接调用也检查扩展名；内容使用 FileFormat.detect 和严格解码/完整性检查。
      *
      * @param source local picture file
      * @return the saved user carrying the new picture
@@ -95,10 +102,11 @@ public final class ProfilePictureService {
      */
     public User setProfilePicture(Path source) throws IOException {
         User current = accounts.requireUser();
+        source = checkSource(source == null ? null : source.toString());
         byte[] content = readSource(source);
         // 只看内容（传 null 文件名），把改名伪装的假图片挡在外面。
         String detected = FileFormat.detect(null, content);
-        if (!ALLOWED.contains(detected)) {
+        if (!ALLOWED.contains(detected) || !canDecode(content, detected)) {
             throw new IllegalArgumentException(
                     "That file is not a real JPG or PNG image, even if its name ends in .jpg or .png");
         }
@@ -106,6 +114,66 @@ public final class ProfilePictureService {
         User updated = current.withProfilePicture(content, format);
         users.save(updated);
         return updated;
+    }
+
+    /**
+     * 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
+     * Decodes all pixels and rejects recovery warnings (for example a missing JPEG EOI).
+     * PNG chunk integrity is checked separately because ImageIO can ignore CRCs and IEND.
+     */
+    private static boolean canDecode(byte[] content, String format) {
+        if (format.equals("png") && !hasValidPngChunks(content)) {
+            return false;
+        }
+        try (MemoryCacheImageInputStream input =
+                new MemoryCacheImageInputStream(new ByteArrayInputStream(content))) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
+            if (!readers.hasNext()) {
+                return false;
+            }
+            ImageReader reader = readers.next();
+            try {
+                boolean[] warning = {false};
+                reader.addIIOReadWarningListener((source, message) -> warning[0] = true);
+                reader.setInput(input);
+                return reader.read(0) != null && !warning[0];
+            } finally {
+                reader.dispose();
+            }
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    /**
+     * 【PR s3-r2-profile-picture-service】实现：Stella ｜ 审核：Henry
+     * Checks bounded PNG chunks, their CRCs, and the terminal empty IEND chunk.
+     * Pixel decoding remains ImageIO's responsibility; no image data is rewritten.
+     */
+    private static boolean hasValidPngChunks(byte[] content) {
+        if (content.length < 8) {
+            return false;
+        }
+        ByteBuffer chunks = ByteBuffer.wrap(content);
+        chunks.position(8); // ImageIO validates the PNG signature.
+        while (chunks.remaining() >= 12) {
+            int length = chunks.getInt();
+            if (length < 0 || length > chunks.remaining() - 8) {
+                return false;
+            }
+            int typeOffset = chunks.position();
+            int type = chunks.getInt();
+            CRC32 crc = new CRC32();
+            crc.update(content, typeOffset, length + 4);
+            chunks.position(chunks.position() + length);
+            if (crc.getValue() != Integer.toUnsignedLong(chunks.getInt())) {
+                return false;
+            }
+            if (type == 0x49454e44) { // IEND
+                return length == 0 && !chunks.hasRemaining();
+            }
+        }
+        return false;
     }
 
     /**

@@ -81,14 +81,20 @@ public final class ProfilePictureScreen {
      * 做什么：输入本地图片路径并立即检查（Stella 的 checkSource），再读取并按内容确认是真图片后保存；成功后显示新格式。
      * 对接/验证：扩展名非 jpg/jpeg/png、文件不存在、过大、假图片都在当时提示并重问；输入 cancel 放弃。
      *
-     * @throws IOException if the picture file cannot be read
      */
-    private void upload() throws IOException {
+    private void upload() {
         accounts.requireUser();
         io.info("Only JPG, JPEG and PNG images up to 5 MiB are accepted. " + ConsoleIO.CANCEL_HINT);
-        Path source = io.askValid("Picture file path: ", ProfilePictureService::checkSource);
-        User updated = pictures.setProfilePicture(source);
-        io.info("Profile picture uploaded (" + updated.getProfilePictureFormat() + ").");
+        while (true) {
+            Path source = io.askValid("Picture file path: ", ProfilePictureService::checkSource);
+            try {
+                User updated = pictures.setProfilePicture(source);
+                io.info("Profile picture uploaded (" + updated.getProfilePictureFormat() + ").");
+                return;
+            } catch (IllegalArgumentException | IOException e) {
+                io.error(e.getMessage());
+            }
+        }
     }
 
     /**
